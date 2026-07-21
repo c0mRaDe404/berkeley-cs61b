@@ -174,13 +174,14 @@ public class Model extends Observable {
         boolean move_exists = false;
         if (emptySpaceExists(b))
             return true;
+
         for (int i=0; i < b.size(); i++) {
 
             for (int j= 0; j < b.size(); j++) {
-                //System.out.print(b.tile(i, j));
                 Tile current = b.tile(i, j);
 
                 int up = j + 1, down = j - 1, left = i - 1, right =  i + 1;
+
                 if (up < b.size())
                     move_exists = move_exists || (current.value() == b.tile(i, up).value());
                 if (down >= 0)
@@ -189,9 +190,7 @@ public class Model extends Observable {
                     move_exists = move_exists || (current.value() == b.tile(left, j).value());
                 if (right < b.size())
                     move_exists = move_exists || (current.value() == b.tile(right, j).value());
-
             }
-            System.out.println();
 
         }
 
