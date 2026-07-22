@@ -94,6 +94,73 @@ public class Model extends Observable {
         setChanged();
     }
 
+    /** updates the current score */
+    private void updateScore(int tile_value) {
+        score += tile_value * 2;
+    }
+
+    /** moves tiles */
+    private boolean doMove(int col, int row, Tile other_tile) {
+      Tile target = board.tile(col, row);
+      if (target != null && target.value() != other_tile.value()) {
+          for (int i = row-1; i >= other_tile.row(); i--) {
+              if (board.tile(col, i) == null){
+                  board.move(col, i, other_tile);
+                  return true;
+              }
+          }
+          return false; // board stays the same if nothing happens. i.e tiles cant merge.
+      }
+      if(board.move(col, row, other_tile))
+         updateScore(other_tile.value());
+      return true; // signals the board state is modified.
+    }
+
+    /** get the next non null value */
+    private Tile getNext(int col, int row) {
+        // check if any non null value exists below the current row (row-1)
+        for (int i = row-1; i >= 0; i--) {
+           if (board.tile(col, i) != null)
+               return board.tile(col, i);
+        }
+
+        return null; // no value to tilt
+    }
+
+    /** process the board row by row */
+    private boolean doRows(int col) {
+        boolean changed = false;
+        Tile next_tile;
+        for (int row = board.size() - 1; row >= 0; row--) {
+
+            next_tile = getNext(col, row); // get the non null element, returns null if no such element exists
+
+            if (next_tile != null) { // perform a move if there is a next element
+                Tile current = board.tile(col, row);
+                if (current == null) {
+                    changed = doMove(col, row, next_tile) || changed;
+                    next_tile = getNext(col, row);
+                    if (next_tile == null) break;
+                }
+
+                changed = doMove(col, row, next_tile) || changed;  // do move and updates the changed state
+            } else {
+                break; // if there exists no next element, no tilt can be performed on that column
+                      // changed state stays the same
+            }
+        }
+        return changed;
+    }
+
+
+    private boolean doTilt() {
+        boolean changed = false;
+        for (int col = 0; col < board.size(); col++) {
+               changed = doRows(col) || changed; // operate on each column and check if the board changes
+        }
+        return changed;
+    }
+
     /** Tilt the board toward SIDE. Return true iff this changes the board.
      *
      * 1. If two Tile objects are adjacent in the direction of motion and have
@@ -113,6 +180,27 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+
+        board.setViewingPerspective(side);
+
+        switch(side) {
+            case NORTH:
+                changed = doTilt();
+                break;
+            case SOUTH:
+                changed = doTilt();
+                break;
+            case EAST:
+                changed = doTilt();
+                break;
+            case WEST:
+                changed = doTilt();
+                break;
+            default:
+                break;
+        }
+
+        board.setViewingPerspective(Side.NORTH);
 
         checkGameOver();
         if (changed) {
