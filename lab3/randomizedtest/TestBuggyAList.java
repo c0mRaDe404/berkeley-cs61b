@@ -23,8 +23,35 @@ public class TestBuggyAList {
         for (int i = 1; i <= 1000; i++) {
             Assert.assertEquals(list1.removeLast(), list2.removeLast());
         }
+    }
 
+    @Test
+    public void randomizedTest() {
+        AListNoResizing<Integer> list1 = new AListNoResizing<>();
+        BuggyAList<Integer> list2 = new BuggyAList<>();
 
+        int N = 5000;
+        for (int i = 0; i < N; i += 1) {
+            int operationNumber = StdRandom.uniform(0, 4);
+            if (operationNumber == 0) {
+                // addLast
+                int randVal = StdRandom.uniform(0, 100);
+                list1.addLast(randVal);
+                list2.addLast(randVal);
+                Assert.assertEquals(list1.getLast(), list2.getLast());
+            } else if (operationNumber == 1) {
+                // size
+                Assert.assertEquals(list1.size(), list2.size());
+            } else if (operationNumber == 2) {
+                if (list1.size() > 0 && list2.size() > 0) {
+                    Assert.assertEquals(list1.getLast(), list2.getLast());
+                }
+            } else if (operationNumber == 3) {
+                if (list1.size() > 0 && list2.size() > 0) {
+                    Assert.assertEquals(list1.removeLast(), list2.removeLast());
+                }
+            }
+        }
 
     }
 }
