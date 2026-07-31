@@ -26,7 +26,7 @@ public class TimeSLList {
         AList<Double> times = new AList<> ();
         AList<Integer> opCounts = new AList<> ();
         int opCount = 10000;
-        for (int i = 1000; i <= 128000/4; i *= 2) {
+        for (int i = 1000; i <= 128000; i *= 2) {
             SLList<Integer> testArray = new SLList<>();
             //Stopwatch sw = new Stopwatch();
             for (int j = 0; j < i; j++) {
