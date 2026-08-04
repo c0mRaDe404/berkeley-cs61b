@@ -1,9 +1,9 @@
 package deque;
 
+import org.junit.Assert;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import edu.princeton.cs.algs4.StdRandom;
-
 
 /** Performs some basic linked list tests. */
 public class ArrayDequeTest {
@@ -246,9 +246,6 @@ public class ArrayDequeTest {
 
 
 
-
-
-
     @Test
     public void testResizeOnAddFirst() {
         ArrayDeque<Integer> dq = new ArrayDeque<>();
@@ -257,8 +254,8 @@ public class ArrayDequeTest {
         }
 
         assertEquals(20, dq.size());
-        assertEquals(15, (int) dq.get(0));  // Last added is first
-        assertEquals(null, dq.get(19));  // First added is last
+        assertEquals(19, (int) dq.get(0));  // Last added is first
+        assertEquals(0, (int) dq.get(19));  // First added is last
     }
 
     @Test
@@ -304,6 +301,67 @@ public class ArrayDequeTest {
     }
 
 
+
+    @Test
+    public void removeComparisonTest() {
+        LinkedListDeque<Integer> list1 = new LinkedListDeque<>();
+        ArrayDeque<Integer> list2 = new ArrayDeque<>();
+
+        for(int i = 0; i < 100; i++) {
+            list1.addFirst(i);
+            list2.addFirst(i);
+        }
+
+    }
+
+
+
+    @Test
+    public void doRandomizedTest() {
+        int iterations = 200;
+        for (int i = 0; i < iterations; i++) {
+            System.out.println("\niteration " + i + ":\n");
+            randomizedTest();
+        }
+    }
+
+    @Test
+    public void randomizedTest() {
+        LinkedListDeque<Integer> list1 = new LinkedListDeque<>();
+        ArrayDeque<Integer> list2 = new ArrayDeque<>();
+
+        int N = 200;
+        for (int i = 0; i < N; i += 1) {
+            int operationNumber = StdRandom.uniform(0, 4);
+            if (operationNumber == 0) {
+                // addLast
+                int randVal = StdRandom.uniform(0, 100);
+                list1.addLast(randVal);
+                list2.addLast(randVal);
+                System.out.println("addLast("+randVal+")");
+                Assert.assertEquals("Operation 0 failed!",list1.get(list1.size()-1), list2.get(list2.size()-1));
+
+            } else if (operationNumber == 1) {
+                int randVal = StdRandom.uniform(0, 100);
+                list1.addFirst(randVal);
+                list2.addFirst(randVal);
+                System.out.println("addFirst("+randVal+")");
+                Assert.assertEquals("Operation 1 failed!",list1.get(0), list2.get(0));
+
+            } else if (operationNumber == 2) {
+                if (list1.size() > 0 && list2.size() > 0) {
+                    System.out.println("removeFirst()");
+                    Assert.assertEquals("Operation 2 failed!", list1.removeFirst(), list2.removeFirst());
+                }
+            } else if (operationNumber == 3) {
+                if (list1.size() > 0 && list2.size() > 0) {
+                    System.out.println("removeLast()");
+                    Assert.assertEquals("Operation 3 failed!", list1.removeLast(), list2.removeLast());
+                }
+            }
+        }
+
+    }
 
 }
 

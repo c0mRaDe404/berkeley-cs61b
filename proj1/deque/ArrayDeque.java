@@ -1,6 +1,8 @@
 package deque;
 
 
+import java.util.Comparator;
+
 public class ArrayDeque<T> implements Deque<T> {
     private T[] queue;
     private int head;
@@ -18,16 +20,20 @@ public class ArrayDeque<T> implements Deque<T> {
      */
 
     private int getHead() {
-        return head % queue.length;
+        return ((head % queue.length) + queue.length) % queue.length;
     }
 
     private int getTail() {
-        return tail % queue.length;
+        return ((tail % queue.length) + queue.length) % queue.length;
+    }
+
+    private int getHeadPos(int offset) {
+        return (getHead() + 1 + offset) % queue.length;
     }
 
     private void resize(int newSize) {
 
-        int start = (head + 1) % queue.length;
+        int start = getHeadPos(0);
         T[] temp = (T[]) new Object[newSize];
 
         for (int i = 0; i < size; i++)
@@ -53,6 +59,7 @@ public class ArrayDeque<T> implements Deque<T> {
            head = queue.length;
            tail = queue.length + 1;
         }
+
         queue[getHead()] = item;
         head--;
         size++;
@@ -85,11 +92,11 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public T removeFirst() {
-        if (size == 0)
+        if (isEmpty())
             return null;
 
         if (queue.length >= 16 && size < queue.length / 4)
-            resize(queue.length / 4);
+            resize(queue.length / 2);
 
         head++;
         size--;
@@ -105,11 +112,11 @@ public class ArrayDeque<T> implements Deque<T> {
     @Override
     public T removeLast() {
 
-        if (size == 0)
+        if (isEmpty())
             return null;
 
         if (queue.length >= 16 && size < queue.length / 4)
-            resize(queue.length / 4);
+            resize(queue.length / 2);
 
         tail--;
         size--;
@@ -126,7 +133,10 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public T get(int index) {
-        return queue[index];
+        if (index >= size || index < 0) {
+            return null;
+        }
+        return queue[getHeadPos(index)];
     }
 
     /**
