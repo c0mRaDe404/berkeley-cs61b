@@ -2,8 +2,9 @@ package deque;
 
 
 import java.util.Comparator;
+import java.util.Iterator;
 
-public class ArrayDeque<T> implements Deque<T> {
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private T[] queue;
     private int head;
     private int tail;
@@ -176,7 +177,6 @@ public class ArrayDeque<T> implements Deque<T> {
     public boolean equals(Object o) {
         if (o instanceof ArrayDeque) {
             ArrayDeque temp = (ArrayDeque) o;
-
             if (size != temp.size())
                 return false;
             for (int i = 0; i < size; i++) {
@@ -186,5 +186,27 @@ public class ArrayDeque<T> implements Deque<T> {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
+
+    private class ArrayDequeIterator implements Iterator<T> {
+
+        int count = 0;
+
+        @Override
+        public boolean hasNext() {
+            return count < size;
+        }
+
+        @Override
+        public T next() {
+          T value = get(getHeadPos(count));
+          count += 1;
+          return value;
+        }
     }
 }
