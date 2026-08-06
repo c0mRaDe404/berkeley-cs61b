@@ -1,6 +1,5 @@
 package deque;
 
-import org.apache.commons.collections.comparators.NullComparator;
 
 import java.util.Comparator;
 

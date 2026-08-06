@@ -1,7 +1,6 @@
 package deque;
 
 
-import java.util.Comparator;
 import java.util.Iterator;
 
 public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
@@ -53,12 +52,13 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public void addFirst(T item) {
-        if (size >= queue.length)
+        if (size >= queue.length) {
             resize(queue.length * 2);
+        }
 
         if (isEmpty()) {
-           head = queue.length;
-           tail = queue.length + 1;
+            head = queue.length;
+            tail = queue.length + 1;
         }
 
         queue[getHead()] = item;
@@ -74,11 +74,13 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public void addLast(T item) {
-        if (size >= queue.length)
+        if (size >= queue.length) {
             resize(queue.length * 2);
+        }
+
         if (isEmpty()) {
-           head = queue.length - 1;
-           tail = queue.length;
+            head = queue.length - 1;
+            tail = queue.length;
         }
         queue[getTail()] = item;
         tail++;
@@ -93,11 +95,13 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public T removeFirst() {
-        if (isEmpty())
+        if (isEmpty()) {
             return null;
+        }
 
-        if (queue.length >= 16 && size < queue.length / 4)
+        if (queue.length >= 16 && size < queue.length / 4) {
             resize(queue.length / 2);
+        }
 
         head++;
         size--;
@@ -113,11 +117,13 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     @Override
     public T removeLast() {
 
-        if (isEmpty())
+        if (isEmpty()) {
             return null;
+        }
 
-        if (queue.length >= 16 && size < queue.length / 4)
+        if (queue.length >= 16 && size < queue.length / 4) {
             resize(queue.length / 2);
+        }
 
         tail--;
         size--;
@@ -139,7 +145,6 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         }
         return queue[getHeadPos(index)];
     }
-
 
 
     /**
@@ -170,11 +175,14 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     public boolean equals(Object o) {
         if (o instanceof ArrayDeque) {
             ArrayDeque temp = (ArrayDeque) o;
-            if (size != temp.size())
+            if (size != temp.size()) {
                 return false;
+            }
+
             for (int i = 0; i < size; i++) {
-                if (!queue[i].equals(temp.get(i)))
+                if (!queue[i].equals(temp.get(i))) {
                     return false;
+                }
             }
             return true;
         }
@@ -197,9 +205,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
         @Override
         public T next() {
-          T value = get(getHeadPos(count));
-          count += 1;
-          return value;
+            T value = get(getHeadPos(count));
+            count += 1;
+            return value;
         }
     }
 }

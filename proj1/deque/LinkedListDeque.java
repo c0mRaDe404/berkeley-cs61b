@@ -37,8 +37,10 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         sentinel.next.prev = newNode;
         sentinel.next = newNode;
 
-        if (sentinel.prev == sentinel)
+        if (sentinel.prev == sentinel) {
             sentinel.prev = newNode;
+        }
+
         size++;
 
     }
@@ -52,7 +54,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         if (sentinel.prev == sentinel) {
             addFirst(item);
         } else {
-
             Node<T> newNode = new Node<>();
             Node<T> tailNode = sentinel.prev;
             newNode.item = item;
@@ -91,8 +92,10 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public T removeFirst() {
-        if (isEmpty())
+        if (isEmpty()) {
             return null;
+        }
+
         Node<T> headNode = sentinel.next;
         sentinel.next = headNode.next;
         headNode.next.prev = sentinel;
@@ -106,11 +109,11 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public T removeLast() {
-        if (isEmpty())
+        if (isEmpty()) {
             return null;
+        }
 
         Node<T> tailNode = sentinel.prev;
-
         tailNode.prev.next = tailNode.next;
         sentinel.prev = tailNode.prev;
         size--;
@@ -130,8 +133,9 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
         int counter = 0;
         for (Node<T> temp = sentinel.next; temp != sentinel; temp = temp.next) {
-            if (counter == index)
+            if (counter == index) {
                 return (T) temp.item;
+            }
             counter++;
         }
         return null;
@@ -148,13 +152,16 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             Node<T> list1 = sentinel.next;
             Node<T> list2 = List.sentinel.next;
 
-            if (size != List.size)
+            if (size != List.size) {
                 return false;
+            }
 
             while (list1 != sentinel && list2 != List.sentinel) {
                 boolean isEqual = list1.item.equals(list2.item);
-                if (!isEqual)
+                if (!isEqual) {
                     return false;
+                }
+
                 list1 = list1.next;
                 list2 = list2.next;
             }
@@ -171,10 +178,13 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
      * @return
      */
     private T getRecursive(int index, Node<T> node) {
-        if (node == sentinel)
+        if (node == sentinel) {
             return null;
-        if (index == 0)
+        }
+
+        if (index == 0) {
             return (T) node.item;
+        }
         return (T) getRecursive(index - 1, node.next);
     }
 

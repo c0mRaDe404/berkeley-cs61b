@@ -2,10 +2,14 @@ package deque;
 
 import org.junit.Assert;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
+
 import edu.princeton.cs.algs4.StdRandom;
 
-/** Performs some basic linked list tests. */
+/**
+ * Performs some basic linked list tests.
+ */
 public class ArrayDequeTest {
 
     @Test
@@ -17,22 +21,22 @@ public class ArrayDequeTest {
 
         ArrayDeque<String> lld1 = new ArrayDeque<String>();
 
-		assertTrue("A newly initialized LLDeque should be empty", lld1.isEmpty());
-		lld1.addFirst("front");
+        assertTrue("A newly initialized LLDeque should be empty", lld1.isEmpty());
+        lld1.addFirst("front");
 
-		// The && operator is the same as "and" in Python.
-		// It's a binary operator that returns true if both arguments true, and false otherwise.
+        // The && operator is the same as "and" in Python.
+        // It's a binary operator that returns true if both arguments true, and false otherwise.
         assertEquals(1, lld1.size());
         assertFalse("lld1 should now contain 1 item", lld1.isEmpty());
 
-		lld1.addLast("middle");
-		assertEquals(2, lld1.size());
+        lld1.addLast("middle");
+        assertEquals(2, lld1.size());
 
-		lld1.addLast("back");
-		assertEquals(3, lld1.size());
+        lld1.addLast("back");
+        assertEquals(3, lld1.size());
 
-		System.out.println("Printing out deque: ");
-		lld1.printDeque();
+        System.out.println("Printing out deque: ");
+        lld1.printDeque();
     }
 
     @Test
@@ -40,16 +44,16 @@ public class ArrayDequeTest {
     public void addRemoveTest() {
 
         ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
-		// should be empty
-		assertTrue("lld1 should be empty upon initialization", lld1.isEmpty());
+        // should be empty
+        assertTrue("lld1 should be empty upon initialization", lld1.isEmpty());
 
-		lld1.addFirst(10);
-		// should not be empty
-		assertFalse("lld1 should contain 1 item", lld1.isEmpty());
+        lld1.addFirst(10);
+        // should not be empty
+        assertFalse("lld1 should contain 1 item", lld1.isEmpty());
 
-		lld1.removeFirst();
-		// should be empty
-		assertTrue("lld1 should be empty after removal", lld1.isEmpty());
+        lld1.removeFirst();
+        // should be empty
+        assertTrue("lld1 should be empty after removal", lld1.isEmpty());
     }
 
     @Test
@@ -76,8 +80,8 @@ public class ArrayDequeTest {
     /* Check if you can create ArrayDeques with different parameterized types*/
     public void multipleParamTest() {
 
-        ArrayDeque<String>  lld1 = new ArrayDeque<String>();
-        ArrayDeque<Double>  lld2 = new ArrayDeque<Double>();
+        ArrayDeque<String> lld1 = new ArrayDeque<String>();
+        ArrayDeque<Double> lld2 = new ArrayDeque<Double>();
         ArrayDeque<Boolean> lld3 = new ArrayDeque<Boolean>();
 
         lld1.addFirst("string");
@@ -245,7 +249,6 @@ public class ArrayDequeTest {
     }
 
 
-
     @Test
     public void testResizeOnAddFirst() {
         ArrayDeque<Integer> dq = new ArrayDeque<>();
@@ -301,19 +304,17 @@ public class ArrayDequeTest {
     }
 
 
-
     @Test
     public void removeComparisonTest() {
         LinkedListDeque<Integer> list1 = new LinkedListDeque<>();
         ArrayDeque<Integer> list2 = new ArrayDeque<>();
 
-        for(int i = 0; i < 100; i++) {
+        for (int i = 0; i < 100; i++) {
             list1.addFirst(i);
             list2.addFirst(i);
         }
 
     }
-
 
 
     @Test
@@ -338,14 +339,14 @@ public class ArrayDequeTest {
                 list1.addLast(randVal);
                 list2.addLast(randVal);
                 //System.out.println("addLast("+randVal+")");
-                Assert.assertEquals("Operation 0 failed!",list1.get(list1.size()-1), list2.get(list2.size()-1));
+                Assert.assertEquals("Operation 0 failed!", list1.get(list1.size() - 1), list2.get(list2.size() - 1));
 
             } else if (operationNumber == 1) {
                 int randVal = StdRandom.uniform(0, 100);
                 list1.addFirst(randVal);
                 list2.addFirst(randVal);
                 //System.out.println("addFirst("+randVal+")");
-                Assert.assertEquals("Operation 1 failed!",list1.get(0), list2.get(0));
+                Assert.assertEquals("Operation 1 failed!", list1.get(0), list2.get(0));
 
             } else if (operationNumber == 2) {
                 if (list1.size() > 0 && list2.size() > 0) {

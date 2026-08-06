@@ -1,6 +1,5 @@
 package deque;
 
-import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.Stopwatch;
 
 public class DequeTimingTest {
@@ -20,9 +19,9 @@ public class DequeTimingTest {
 
 
     public static void timeLinkedListDequeConstruction() {
-        ArrayDeque<Integer> N = new ArrayDeque<> ();
-        ArrayDeque<Double> times = new ArrayDeque<> ();
-        ArrayDeque<Integer> opCounts = new ArrayDeque<> ();
+        ArrayDeque<Integer> N = new ArrayDeque<>();
+        ArrayDeque<Double> times = new ArrayDeque<>();
+        ArrayDeque<Integer> opCounts = new ArrayDeque<>();
         for (int i = 1000; i <= 128000; i *= 2) {
             LinkedListDeque<Integer> testLinkedList = new LinkedListDeque<>();
             Stopwatch sw = new Stopwatch();
@@ -38,9 +37,9 @@ public class DequeTimingTest {
     }
 
     public static void timeArrayDequeConstruction() {
-        ArrayDeque<Integer> N = new ArrayDeque<> ();
-        ArrayDeque<Double> times = new ArrayDeque<> ();
-        ArrayDeque<Integer> opCounts = new ArrayDeque<> ();
+        ArrayDeque<Integer> N = new ArrayDeque<>();
+        ArrayDeque<Double> times = new ArrayDeque<>();
+        ArrayDeque<Integer> opCounts = new ArrayDeque<>();
         for (int i = 1000; i <= 128000; i *= 2) {
             ArrayDeque<Integer> testArray = new ArrayDeque<>();
             Stopwatch sw = new Stopwatch();
@@ -57,9 +56,9 @@ public class DequeTimingTest {
 
 
     public static void LinkedListDequeTimeGetMiddle() {
-        ArrayDeque<Integer> N = new ArrayDeque<> ();
-        ArrayDeque<Double> times = new ArrayDeque<> ();
-        ArrayDeque<Integer> opCounts = new ArrayDeque<> ();
+        ArrayDeque<Integer> N = new ArrayDeque<>();
+        ArrayDeque<Double> times = new ArrayDeque<>();
+        ArrayDeque<Integer> opCounts = new ArrayDeque<>();
         int opCount = 10000;
         for (int i = 1000; i <= 128000; i *= 2) {
             LinkedListDeque<Integer> testArray = new LinkedListDeque<>();
@@ -70,7 +69,7 @@ public class DequeTimingTest {
             Stopwatch sw = new Stopwatch();
 
             for (int k = 0; k < opCount; k++) {
-                testArray.get(testArray.size()-1);
+                testArray.get(testArray.size() - 1);
             }
 
             times.addLast(sw.elapsedTime());
@@ -83,9 +82,9 @@ public class DequeTimingTest {
 
 
     public static void ArrayDequeTimeGetMiddle() {
-        ArrayDeque<Integer> N = new ArrayDeque<> ();
-        ArrayDeque<Double> times = new ArrayDeque<> ();
-        ArrayDeque<Integer> opCounts = new ArrayDeque<> ();
+        ArrayDeque<Integer> N = new ArrayDeque<>();
+        ArrayDeque<Double> times = new ArrayDeque<>();
+        ArrayDeque<Integer> opCounts = new ArrayDeque<>();
         int opCount = 10000;
         for (int i = 1000; i <= 128000; i *= 2) {
             ArrayDeque<Integer> testArray = new ArrayDeque<>();
@@ -96,7 +95,7 @@ public class DequeTimingTest {
             Stopwatch sw = new Stopwatch();
 
             for (int k = 0; k < opCount; k++) {
-                testArray.get(testArray.size()-1);
+                testArray.get(testArray.size() - 1);
             }
 
             times.addLast(sw.elapsedTime());

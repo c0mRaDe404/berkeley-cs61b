@@ -1,6 +1,5 @@
 package gh2;
 
-import deque.ArrayDeque;
 import edu.princeton.cs.algs4.StdAudio;
 import edu.princeton.cs.algs4.StdDraw;
 
@@ -19,7 +18,7 @@ public class GuitarHero {
     }
 
     public int getKeyIndex(char key) {
-       return keyboard.indexOf(key);
+        return keyboard.indexOf(key);
     }
 
     public GuitarString getKey(char key) {
@@ -29,14 +28,14 @@ public class GuitarHero {
     public double getSuperPosition() {
         double sum = 0.0;
         for (int i = 0; i < totalKeys; i++) {
-            sum +=  keys[i].sample();
+            sum += keys[i].sample();
         }
         return sum;
     }
 
     public void advanceTic() {
         for (int i = 0; i < totalKeys; i++) {
-           keys[i].tic();
+            keys[i].tic();
         }
     }
 
