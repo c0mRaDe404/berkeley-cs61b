@@ -36,8 +36,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         int start = getHeadPos(0);
         T[] temp = (T[]) new Object[newSize];
 
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < size; i++) {
             temp[i] = queue[(start + i) % queue.length];
+        }
 
         queue = temp;
         head = queue.length - 1;
@@ -171,10 +172,22 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     /**
      * checks if both deque are the same
      */
+
+
     @Override
     public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null) {
+            return false;
+        }
+
         if (o instanceof ArrayDeque) {
+
             ArrayDeque temp = (ArrayDeque) o;
+
             if (size != temp.size()) {
                 return false;
             }
@@ -185,9 +198,11 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
                 }
             }
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
+
 
     @Override
     public Iterator<T> iterator() {

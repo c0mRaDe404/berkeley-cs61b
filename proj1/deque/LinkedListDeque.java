@@ -146,6 +146,14 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
      */
     @Override
     public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null) {
+            return false;
+        }
+
         if (o instanceof LinkedListDeque) {
 
             LinkedListDeque List = (LinkedListDeque) o;
@@ -156,17 +164,18 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
                 return false;
             }
 
-            while (list1 != sentinel && list2 != List.sentinel) {
+            while (list1 != sentinel) {
                 boolean isEqual = list1.item.equals(list2.item);
                 if (!isEqual) {
                     return false;
                 }
-
                 list1 = list1.next;
                 list2 = list2.next;
             }
+            return true;
+        } else {
+            return false;
         }
-        return true;
     }
 
     /**
