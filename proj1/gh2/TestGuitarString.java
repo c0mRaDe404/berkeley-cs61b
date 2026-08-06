@@ -16,7 +16,116 @@ public class TestGuitarString  {
     public void testPluckTheAString() {
         GuitarString aString = new GuitarString(GuitarHeroLite.CONCERT_A);
         aString.pluck();
+        for (int i = 0; i < 1000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 10000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 10000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 1000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 100; i += 1) {
+            StdAudio.play(0.123);
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 1000; i += 1) {
+            StdAudio.play(0.500);
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
         for (int i = 0; i < 50000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+
+
+        aString.pluck();
+        for (int i = 0; i < 1000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 10000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 10000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 1000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 100; i += 1) {
+            StdAudio.play(0.123);
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 1000; i += 1) {
+            StdAudio.play(0.500);
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 5000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+
+        aString.pluck();
+        for (int i = 0; i < 1000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 2000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 10; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 3000; i += 1) {
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 500; i += 1) {
+            StdAudio.play(0.123);
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 1501; i += 1) {
+            StdAudio.play(0.500);
+            StdAudio.play(aString.sample());
+            aString.tic();
+        }
+        aString.pluck();
+        for (int i = 0; i < 5000; i += 1) {
             StdAudio.play(aString.sample());
             aString.tic();
         }

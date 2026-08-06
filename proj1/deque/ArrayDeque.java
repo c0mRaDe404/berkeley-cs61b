@@ -140,14 +140,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return queue[getHeadPos(index)];
     }
 
-    /**
-     * check if a deque is empty.
-     */
 
-    @Override
-    public boolean isEmpty() {
-        return size == 0;
-    }
 
     /**
      * get the size of a deque.

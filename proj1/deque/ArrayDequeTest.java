@@ -320,7 +320,6 @@ public class ArrayDequeTest {
     public void doRandomizedTest() {
         int iterations = 200;
         for (int i = 0; i < iterations; i++) {
-            System.out.println("\niteration " + i + ":\n");
             randomizedTest();
         }
     }
@@ -338,24 +337,24 @@ public class ArrayDequeTest {
                 int randVal = StdRandom.uniform(0, 100);
                 list1.addLast(randVal);
                 list2.addLast(randVal);
-                System.out.println("addLast("+randVal+")");
+                //System.out.println("addLast("+randVal+")");
                 Assert.assertEquals("Operation 0 failed!",list1.get(list1.size()-1), list2.get(list2.size()-1));
 
             } else if (operationNumber == 1) {
                 int randVal = StdRandom.uniform(0, 100);
                 list1.addFirst(randVal);
                 list2.addFirst(randVal);
-                System.out.println("addFirst("+randVal+")");
+                //System.out.println("addFirst("+randVal+")");
                 Assert.assertEquals("Operation 1 failed!",list1.get(0), list2.get(0));
 
             } else if (operationNumber == 2) {
                 if (list1.size() > 0 && list2.size() > 0) {
-                    System.out.println("removeFirst()");
+                    //System.out.println("removeFirst()");
                     Assert.assertEquals("Operation 2 failed!", list1.removeFirst(), list2.removeFirst());
                 }
             } else if (operationNumber == 3) {
                 if (list1.size() > 0 && list2.size() > 0) {
-                    System.out.println("removeLast()");
+                    //System.out.println("removeLast()");
                     Assert.assertEquals("Operation 3 failed!", list1.removeLast(), list2.removeLast());
                 }
             }
