@@ -165,7 +165,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     @Override
     public void printDeque() {
         for (int i = 0; i < size; i++) {
-            System.out.print(queue[i] + " ");
+            System.out.print(get(i) + " ");
         }
     }
 
@@ -194,7 +194,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             }
 
             for (int i = 0; i < size; i++) {
-                if (!queue[i].equals(temp.get(i))) {
+                if (!get(i).equals(temp.get(i))) {
                     return false;
                 }
             }
@@ -222,11 +222,10 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         @Override
         public T next() {
             if(!hasNext())  {
-               return null;
+               throw new NoSuchElementException();
             }
-            T value = get(getHeadPos(count));
-            count += 1;
-            return value;
+
+            return get(count++);
         }
     }
 }

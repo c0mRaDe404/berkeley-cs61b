@@ -387,7 +387,7 @@ public class ArrayDequeTest {
         ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
         Iterator<Integer> iter = lld1.iterator();
         assertFalse(iter.hasNext());
-        assertNull(iter.next());
+
     }
 }
 
