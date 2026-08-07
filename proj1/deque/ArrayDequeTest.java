@@ -108,7 +108,7 @@ public class ArrayDequeTest {
 
     @Test
     /* Add large number of elements to deque; check if order is correct. */
-    public void bigLLDequeTest() {
+    public void bigArrayDequeTest() {
 
         ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
         for (int i = 0; i < 1000; i++) {
@@ -363,5 +363,21 @@ public class ArrayDequeTest {
 
     }
 
+    @Test
+    public void arrayDequeIteratorTest() {
+
+        ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
+        ArrayDeque<Integer> lld2 = new ArrayDeque<Integer>();
+
+        for (int i = 0; i < 10; i++) {
+            lld1.addLast(i);
+            lld2.addLast(i);
+        }
+
+       for (Integer value : lld1) {
+           assertEquals(value, lld2.removeFirst());
+       }
+
+    }
 }
 
