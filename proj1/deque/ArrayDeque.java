@@ -212,7 +212,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     private class ArrayDequeIterator implements Iterator<T> {
 
-        int count = 0;
+        private int count = 0;
 
         @Override
         public boolean hasNext() {
@@ -221,8 +221,8 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
         @Override
         public T next() {
-            if (count >= size) {
-                throw new NoSuchElementException();
+            if(!hasNext())  {
+               return null;
             }
             T value = get(getHeadPos(count));
             count += 1;

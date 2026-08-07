@@ -7,6 +7,8 @@ import static org.junit.Assert.*;
 
 import edu.princeton.cs.algs4.StdRandom;
 
+import java.util.Iterator;
+
 /**
  * Performs some basic linked list tests.
  */
@@ -373,11 +375,19 @@ public class ArrayDequeTest {
             lld1.addLast(i);
             lld2.addLast(i);
         }
-
        for (Integer value : lld1) {
            assertEquals(value, lld2.removeFirst());
        }
 
+    }
+
+    @Test
+    public void arrayDequeIteratorEmptyTest() {
+
+        ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
+        Iterator<Integer> iter = lld1.iterator();
+        assertFalse(iter.hasNext());
+        assertNull(iter.next());
     }
 }
 
