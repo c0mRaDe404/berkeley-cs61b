@@ -56,7 +56,7 @@ public class GuitarHero {
             if (StdDraw.hasNextKeyTyped()) {
                 char key = StdDraw.nextKeyTyped();
                 if (s.getKeyIndex(key) < 0) {
-                    System.out.println("<"+ key +"> Invalid key dude!!!");
+                    System.out.println("<" + key + "> Invalid key dude!!!");
                 } else {
                     s.getKey(key).pluck();
                 }

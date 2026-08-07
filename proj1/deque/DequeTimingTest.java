@@ -4,11 +4,13 @@ import edu.princeton.cs.algs4.Stopwatch;
 
 public class DequeTimingTest {
 
-    private static void printTimingTable(ArrayDeque<Integer> Ns, ArrayDeque<Double> times, ArrayDeque<Integer> opCounts) {
+    private static void printTimingTable(ArrayDeque<Integer> nS,
+                                         ArrayDeque<Double> times,
+                                         ArrayDeque<Integer> opCounts) {
         System.out.printf("%12s %12s %12s %12s\n", "N", "time (s)", "# ops", "microsec/op");
         System.out.printf("------------------------------------------------------------\n");
-        for (int i = 0; i < Ns.size(); i += 1) {
-            int N = Ns.get(i);
+        for (int i = 0; i < nS.size(); i += 1) {
+            int N = nS.get(i);
             double time = times.get(i);
             int opCount = opCounts.get(i);
             double timePerOp = time / opCount * 1e6;
@@ -55,7 +57,7 @@ public class DequeTimingTest {
     }
 
 
-    public static void LinkedListDequeTimeGetMiddle() {
+    public static void linkedListDequeTimeGetMiddle() {
         ArrayDeque<Integer> N = new ArrayDeque<>();
         ArrayDeque<Double> times = new ArrayDeque<>();
         ArrayDeque<Integer> opCounts = new ArrayDeque<>();
@@ -81,7 +83,7 @@ public class DequeTimingTest {
     }
 
 
-    public static void ArrayDequeTimeGetMiddle() {
+    public static void arrayDequeTimeGetMiddle() {
         ArrayDeque<Integer> N = new ArrayDeque<>();
         ArrayDeque<Double> times = new ArrayDeque<>();
         ArrayDeque<Integer> opCounts = new ArrayDeque<>();
@@ -119,11 +121,11 @@ public class DequeTimingTest {
 
         System.out.println();
         System.out.println("LinkedListDequeGetMiddle:");
-        LinkedListDequeTimeGetMiddle();
+        linkedListDequeTimeGetMiddle();
 
         System.out.println();
         System.out.println("ArrayDequeGetMiddle:");
-        ArrayDequeTimeGetMiddle();
+        arrayDequeTimeGetMiddle();
     }
 
 }
