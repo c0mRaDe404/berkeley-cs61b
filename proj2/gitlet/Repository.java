@@ -29,8 +29,8 @@ public class Repository {
 
     /* TODO: fill in the rest of this class. */
     private static final File[] DIRS = {join(GITLET_DIR,"objects"), join(GITLET_DIR,"refs"),
-            join(GITLET_DIR, "branches")};
-    private static final File[] FILES = {join(GITLET_DIR,"HEAD"), join(GITLET_DIR,"index")};
+            join(GITLET_DIR, "branches"), join(GITLET_DIR,"refs", "head")}; // order should be preserved
+    private static final File[] FILES = {join(GITLET_DIR,"HEAD"), join(GITLET_DIR,"index")}; // order doesnt matter
 
     public static void createRepository() {
         if (GITLET_DIR.exists()) {

@@ -2,6 +2,7 @@ package bstmap;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import edu.princeton.cs.algs4.StdRandom;
 
 /** Tests by Brendan Hu, Spring 2015, revised for 2016 by Josh Hug */
 public class TestBSTMap {
@@ -85,6 +86,16 @@ public class TestBSTMap {
         BSTMap<String, Integer> b = new BSTMap<String, Integer>();
         b.put("hi", null);
         assertTrue(b.containsKey("hi"));
+    }
+
+    @Test
+    public void putRandomTest() {
+        BSTMap<Integer, String> c = new BSTMap<Integer, String>();
+        int[] keys = {54, 38, 42, 43, 41, 9, 95, 63, 51};
+        for (int i = 0; i < 9; i++) {
+            c.put(keys[i], ""+i);
+        }
+        c.printInOrder();
     }
 
 }

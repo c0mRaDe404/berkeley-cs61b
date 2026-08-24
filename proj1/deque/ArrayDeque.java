@@ -197,6 +197,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
         @Override
         public T next() {
+          assert hasNext();
           T value = get(getHeadPos(count));
           count += 1;
           return value;
