@@ -67,6 +67,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         return size;
     }
 
+    /** helper method for put */
     private BSTNode put(BSTNode node, K key, V value) {
 
         if (node == null) {
@@ -90,7 +91,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     }
 
 
-
+    /** helper for printInOrder */
     private void printInOrder(BSTNode node) {
         if (node == null) {
             return;
@@ -101,61 +102,65 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         printInOrder(node.right);
     }
 
+    /** print BST inorder */
     public void printInOrder() {
         printInOrder(root);
     }
 
     @Override
     public Set<K> keySet() {
-       Set<K> set = new HashSet<>();
-       for (K key : this) {
-          set.add(key);
-       }
-       return set;
-    }
-
-   private boolean isLeaf(BSTNode node) {
-        return node.left == null && node.right == null;
-   }
-
-    private BSTNode min(BSTNode node) {
-       BSTNode temp = node;
-       while (temp != null) {
-           temp = temp.left;
-       }
-       return temp;
-    }
-
-    private BSTNode max(BSTNode node) {
-        BSTNode temp = node;
-        while (temp != null) {
-            temp = temp.right;
+        Set<K> set = new HashSet<>();
+        for (K key : this) {
+            set.add(key);
         }
-        return temp;
+        return set;
     }
 
+    /** checks if a node is a leaf */
+    private boolean isLeaf(BSTNode node) {
+        return node.left == null && node.right == null;
+    }
 
-    private V remove(BSTNode node, K key, V value) {
+    private BSTNode deleteMin(BSTNode root, BSTNode curr) {
+       if (curr.left == null) {
+          root.value = curr.value;
+          root.key = curr.key;
+          return remove(curr.right, curr.key, null);
+       } else {
+           curr.left = deleteMin(root, curr.left);
+       }
+       return curr;
+    }
+
+    /** helper for helper of the remove */
+    private BSTNode removeNode(BSTNode node, K key, V value) {
+        if (isLeaf(node)) { // if it's a leaf, return null;
+            return null;
+        } else if (node.left == null) { // if left is empty, return right;
+            return node.right;
+        } else if (node.right == null) { // if right is empty, return left;
+            return node.left;
+        } else { // otherwise replace
+            node.right =  deleteMin(node, node.right);
+            return node;
+        }
+    }
+    /** helper method for remove */
+    private BSTNode remove(BSTNode node, K key, V value) {
         if (node == null) {
             size -= 1;
             return null;
         }
         if (key.compareTo(node.key) == 0) {
-           if (isLeaf(node)) {
-               return null;
-           } else {
-             BSTNode predecessor = max(node.left);
-             if(predecessor != null) {
-
-             } else {
-                 BSTNode successor = min(node.right);
-
-             }
-           }
+            return removeNode(node, key, value); // call delete once the key is found
         } else if (key.compareTo(node.key) >= 1) {
-            node.right.value = remove(node.right, key, value);
+            BSTNode temp;
+            temp = remove(node.right, key, value);
+            node.right = temp;
         } else {
-            node.left.value = remove(node.left, key, value);
+            BSTNode temp;
+            temp = remove(node.left, key, value);
+            node.left = temp;
         }
 
         return node;
@@ -164,7 +169,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public V remove(K key) {
-        throw new UnsupportedOperationException();
+       return remove(root, key, null).value;
     }
 
     @Override
@@ -174,7 +179,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public Iterator<K> iterator() {
-       return new BSTMapIterator();
+        return new BSTMapIterator();
     }
 
     private class BSTMapIterator implements Iterator<K> {
@@ -200,7 +205,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
                 stack.push(cur.right);
             }
             if (cur.left != null) {
-               stack.push(cur.left);
+                stack.push(cur.left);
             }
             return cur.key;
         }
