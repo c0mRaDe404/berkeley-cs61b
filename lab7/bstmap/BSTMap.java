@@ -4,9 +4,9 @@ import java.util.*;
 
 public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
-    private BSTNode root = null;
+    private  BSTNode root = null;
     private int size = 0;
-
+    private V deleted = null;
 
     private class BSTNode {
 
@@ -21,12 +21,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
             this.left = null;
             this.right = null;
         }
-        private BSTNode(K key, V value, BSTNode left, BSTNode right) {
-            this.key = key;
-            this.value = value;
-            this.left = left;
-            this.right = right;
-        }
+
     }
 
     @Override
@@ -40,6 +35,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         return get(root, key) != null;
     }
 
+    /** get the node matches the key and returns it */
     private BSTNode get(BSTNode node, K key) {
         if (node == null) {
             return null;
@@ -121,60 +117,66 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         return node.left == null && node.right == null;
     }
 
-    private BSTNode deleteMin(BSTNode root, BSTNode curr) {
-       if (curr.left == null) {
-          root.value = curr.value;
-          root.key = curr.key;
-          return remove(curr.right, curr.key, null);
+    /** find the minimum of rtree, replace it with curr and delete the minimum */
+    private BSTNode removeMinAndReplace(BSTNode curr, BSTNode rtree) {
+
+        if (rtree.left == null) {
+            curr.key = rtree.key;
+            curr.value = rtree.value;
+            return rtree.right;
+        }
+
+       rtree.left  = removeMinAndReplace(curr, rtree.left);
+       return rtree;
+    }
+
+    /** removes a bst node */
+    private BSTNode bstRemoveNode(BSTNode curr) {
+        deleted = curr.value;
+        size--;
+       if(isLeaf(curr)) {
+          return null;
+       } else if (curr.left == null) {
+           return curr.right;
+       } else if (curr.right == null) {
+          return curr.left;
        } else {
-           curr.left = deleteMin(root, curr.left);
+          curr.right = removeMinAndReplace(curr, curr.right);
+          return curr;
        }
-       return curr;
     }
 
-    /** helper for helper of the remove */
-    private BSTNode removeNode(BSTNode node, K key, V value) {
-        if (isLeaf(node)) { // if it's a leaf, return null;
-            return null;
-        } else if (node.left == null) { // if left is empty, return right;
-            return node.right;
-        } else if (node.right == null) { // if right is empty, return left;
-            return node.left;
-        } else { // otherwise replace
-            node.right =  deleteMin(node, node.right);
-            return node;
-        }
-    }
-    /** helper method for remove */
-    private BSTNode remove(BSTNode node, K key, V value) {
-        if (node == null) {
-            size -= 1;
+    private BSTNode removeNode(BSTNode curr, K key, V value) {
+        if (curr == null) {
             return null;
         }
-        if (key.compareTo(node.key) == 0) {
-            return removeNode(node, key, value); // call delete once the key is found
-        } else if (key.compareTo(node.key) >= 1) {
-            BSTNode temp;
-            temp = remove(node.right, key, value);
-            node.right = temp;
+
+        if (key.compareTo(curr.key) == 0) {
+             // need to trigger remove over here;
+             if (value != null && !value.equals(curr.value)) {
+                return curr;
+             }
+             return bstRemoveNode(curr);
+        } else if (key.compareTo(curr.key) >= 1) {
+            curr.right = removeNode(curr.right, key, value);
         } else {
-            BSTNode temp;
-            temp = remove(node.left, key, value);
-            node.left = temp;
+            curr.left = removeNode(curr.left, key, value);
         }
 
-        return node;
-
+        return curr;
     }
+
 
     @Override
     public V remove(K key) {
-       return remove(root, key, null).value;
+        root = removeNode(root, key, null);
+        return deleted;
     }
 
     @Override
     public V remove(K key, V value) {
-        throw new UnsupportedOperationException();
+        root  = removeNode(root, key, value);
+        return deleted;
     }
 
     @Override
