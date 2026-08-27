@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -157,5 +158,24 @@ public class TestMyHashMap {
         studentIDs.put("evil alan", 345);
         assertEquals(345, studentIDs.get("evil alan").intValue());
         assertEquals(studentIDs.get("evil alan"), studentIDs.get("alan"));
+    }
+
+
+
+    @Test
+    public void IteratorTest() {
+        sanityIteratorTest(new MyHashMap<>());
+    }
+
+    public static void sanityIteratorTest(MyHashMap<String, Integer> b) {
+        HashSet<String> values = new HashSet<String>();
+        for (int i = 0; i < 50; i++) {
+            b.put("hi" + i, 1);
+            values.add("hi" + i);
+        }
+        Iterator<String> iter = b.iterator();
+        for (int i = 0; i < b.size(); i++) {
+            System.out.println(iter.next());
+        }
     }
 }
