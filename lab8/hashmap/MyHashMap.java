@@ -141,14 +141,23 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         size = 0;
     }
 
+    /** get a bucket and check if it's already been filled
+     *
+     * @param bucket
+     * @return boolean
+     */
+    private boolean containsKey(Node bucket) {
+       if (bucket == null) {
+           return false;
+       }
+       return true;
+    }
+
     @Override
     public boolean containsKey(K key) {
         checkNullKey(key);
         Node bucket = getBucket(key);
-        if (bucket == null) {
-            return false;
-        }
-        return true;
+        return containsKey(bucket);
     }
 
     @Override
@@ -182,6 +191,27 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         return null;
     }
 
+    /** creates a new bucket
+     * @param key
+     * @param value
+     */
+    private void addBucket(K key, V value) {
+        int index = getHash(key, buckets.length);
+        Node newNode = createNode(key, value);
+        buckets[index].add(newNode);
+        size++;
+    }
+
+
+    /** updates a bucket's value
+     *
+     * @param bucket
+     * @param value
+     */
+    private void updateBucket(Node bucket, V value) {
+       bucket.value = value;
+    }
+
     @Override
     public void put(K key, V value) {
         checkNullKey(key);
@@ -191,17 +221,15 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         }
 
         Node bucket = getBucket(key);
-        int index = getHash(key, buckets.length);
 
-        if (bucket == null) {
-            Node newNode = createNode(key, value);
-            buckets[index].add(newNode);
-            size++;
+        if (!containsKey(bucket)) {
+            addBucket(key, value);
         } else {
-            bucket.value = value;
+            updateBucket(bucket, value);
         }
 
     }
+
 
     @Override
     public Set<K> keySet() {
@@ -217,15 +245,16 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         return remove(key, null);
     }
 
-    @Override
-    public V remove(K key, V value) {
-        checkNullKey(key);
+    /** removes a bucket
+     *
+      * @param key
+     * @param value
+     * @return value
+     */
+    private V removeBucket(K key, V value) {
+
         int index = getHash(key, buckets.length);
         Node bucket = getBucket(key);
-
-        if (bucket == null) {
-            return null;
-        }
 
         if (bucket.value.equals(value) || value == null) {
             buckets[index].remove(bucket);
@@ -233,6 +262,17 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
 
         size--;
         return bucket.value;
+
+    }
+
+    @Override
+    public V remove(K key, V value) {
+        checkNullKey(key);
+        if (!containsKey(key)) {
+            return null;
+        }
+        return removeBucket(key, value);
+
     }
 
     @Override
