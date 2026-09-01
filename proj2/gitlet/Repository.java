@@ -11,7 +11,7 @@ import static gitlet.Utils.*;
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
- *  @author TODO
+ *  @author Bhuvanesh
  */
 public class Repository {
     /**
@@ -24,41 +24,72 @@ public class Repository {
 
     /** The current working directory. */
     public static final File CWD = new File(System.getProperty("user.dir"));
+
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
-    /* TODO: fill in the rest of this class. */
-    private static final File[] DIRS = {join(GITLET_DIR,"objects"), join(GITLET_DIR,"refs"),
-            join(GITLET_DIR, "branches"), join(GITLET_DIR,"refs", "head")}; // order should be preserved
-    private static final File[] FILES = {join(GITLET_DIR,"HEAD"), join(GITLET_DIR,"index")}; // order doesnt matter
+    private static final File[] DIRS = {
+            join(GITLET_DIR,"objects"),
+            join(GITLET_DIR,"refs"),
+            join(GITLET_DIR, "branches"),
+            join(GITLET_DIR,"refs", "heads"),
+            join(GITLET_DIR,"refs", "tags")
+    }; // order should be preserved
+
+    private static final File[] FILES = {
+            join(GITLET_DIR,"HEAD"),
+            join(GITLET_DIR,"index")
+    }; // order doesnt matter
+
+    private static boolean repoExists() {
+       return GITLET_DIR.exists();
+    }
+
+    private static void createDirectory(File dir) {
+        if (!dir.mkdir()) {
+            System.out.println("Can't setup the" + dir.getPath() + " directory!");
+            System.exit(0);
+        }
+    }
+
+    private static void createFile(File file) {
+        try {
+            if (!file.createNewFile()) {
+                System.out.println("Can't setup the" + file.getPath() + " file!");
+                System.exit(0);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static boolean makeGitletRepo() {
+       return GITLET_DIR.mkdir();
+    }
+
+    private static String getRepoPath() {
+        return GITLET_DIR.getPath();
+    }
 
     public static void createRepository() {
-        if (GITLET_DIR.exists()) {
+        if (repoExists()) {
             System.err.println(".gitlet has already been initialized.");
             System.exit(0);
         }
 
-        if (!GITLET_DIR.mkdir()) {
-            System.out.println("Can't setup the" + GITLET_DIR.getPath() + " directory!");
+        if (!makeGitletRepo()) {
+            System.out.println("Can't setup the" + getRepoPath() + " directory!");
             System.exit(0);
         }
 
         for (File dir : DIRS) {
-            if (!dir.mkdir()) {
-                System.out.println("Can't setup the" + dir.getPath() + " directory!");
-                System.exit(0);
-            }
+            createDirectory(dir);
         }
+
         for (File file : FILES) {
-            try {
-                if (!file.createNewFile()) {
-                    System.out.println("Can't setup the" + file.getPath() + " file!");
-                    System.exit(0);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+           createFile(file);
         }
+
     }
 
 }

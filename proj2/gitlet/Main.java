@@ -10,7 +10,13 @@ public class Main {
      */
     public static void main(String[] args) {
         // TODO: what if args is empty?
+        if (args.length < 1) {
+           System.err.println("usage: gitlet.Main [command]");
+           System.exit(0);
+        }
+
         String firstArg = args[0];
+
         switch(firstArg) {
             case "init":
                 Repository.createRepository();
