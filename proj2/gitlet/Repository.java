@@ -2,8 +2,11 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-
+import java.time.Instant;
 import static gitlet.Utils.*;
+import static gitlet.GitletBranch.createBranch;
+import static gitlet.GitletBranch.getCurrentBranch;
+import static gitlet.Commit.createCommitObject;
 
 // TODO: any imports you need here
 
@@ -38,21 +41,20 @@ public class Repository {
 
     private static final File[] FILES = {
             join(GITLET_DIR,"HEAD"),
-            join(GITLET_DIR,"index")
     }; // order doesnt matter
 
     private static boolean repoExists() {
        return GITLET_DIR.exists();
     }
 
-    private static void createDirectory(File dir) {
+     static void createDirectory(File dir) {
         if (!dir.mkdir()) {
             System.out.println("Can't setup the" + dir.getPath() + " directory!");
             System.exit(0);
         }
     }
 
-    private static void createFile(File file) {
+    static void createFile(File file) {
         try {
             if (!file.createNewFile()) {
                 System.out.println("Can't setup the" + file.getPath() + " file!");
@@ -71,9 +73,9 @@ public class Repository {
         return GITLET_DIR.getPath();
     }
 
-    public static void createRepository() {
+    private static void createRepository() {
         if (repoExists()) {
-            System.err.println(".gitlet has already been initialized.");
+            System.err.println("A Gitlet version-control system already exists in the current directory.");
             System.exit(0);
         }
 
@@ -90,6 +92,19 @@ public class Repository {
            createFile(file);
         }
 
+    }
+
+    public static void initRepo() {
+        Repository.createRepository();
+        Commit initialCommit = createCommitObject("initial commit", Instant.EPOCH.toString());
+        createBranch(getCurrentBranch(), initialCommit.createCommit());
+        updateHead(getCurrentBranch());
+    }
+
+
+    public static void updateHead(String ref) {
+       File head =  join(GITLET_DIR,"HEAD");
+       Utils.writeContents(head, "refs/heads/" + ref);
     }
 
 }
