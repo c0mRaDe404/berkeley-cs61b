@@ -1,5 +1,6 @@
 package gitlet;
 
+import static gitlet.GiletCommit.*;
 import static gitlet.GitletIndex.addToIndex;
 import static gitlet.GitletIndex.listFilesFromIndex;
 
@@ -31,8 +32,7 @@ public class Main {
 
         switch(firstArg) {
             case "init":
-                Repository.initRepo();
-
+                GitletRepository.initRepo();
                 break;
             case "add":
                 // TODO: check if a user is in a gitlet ininitialized directory, otherwise exit
@@ -40,9 +40,18 @@ public class Main {
                 // TODO: check not only argument count, but also appropriateness
                 addToIndex(args[1]);
                 break;
-            // TODO: FILL THE REST IN
+            case "commit":
+                makeCommit(args[1]);
+                break;
             case "ls-files":
                 listFilesFromIndex();
+                break;
+            case "show":
+                if (args.length < 2) {
+                    showLatestCommit();
+                } else {
+                    showCommit(args[1]);
+                }
                 break;
             case "hash-object":
                System.out.println(GitletObject.hashFileObject(args[1]));

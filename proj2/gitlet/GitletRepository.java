@@ -3,10 +3,10 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+
+import static gitlet.GitletBranch.*;
 import static gitlet.Utils.*;
-import static gitlet.GitletBranch.createBranch;
-import static gitlet.GitletBranch.getCurrentBranch;
-import static gitlet.Commit.createCommitObject;
+import static gitlet.GiletCommit.createCommitObject;
 
 // TODO: any imports you need here
 
@@ -16,7 +16,7 @@ import static gitlet.Commit.createCommitObject;
  *
  *  @author Bhuvanesh
  */
-public class Repository {
+public class GitletRepository {
     /**
      * TODO: add instance variables here.
      *
@@ -31,6 +31,8 @@ public class Repository {
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
+
+
     private static final File[] DIRS = {
             join(GITLET_DIR,"objects"),
             join(GITLET_DIR,"refs"),
@@ -40,13 +42,17 @@ public class Repository {
     }; // order should be preserved
 
     private static final File[] FILES = {
-            join(GITLET_DIR,"HEAD"),
+           headPtr
     }; // order doesnt matter
 
     private static boolean repoExists() {
        return GITLET_DIR.exists();
     }
 
+    /** creates a new directory
+     *
+     * @param dir
+     */
      static void createDirectory(File dir) {
         if (!dir.mkdir()) {
             System.out.println("Can't setup the" + dir.getPath() + " directory!");
@@ -54,6 +60,10 @@ public class Repository {
         }
     }
 
+    /** creates a file
+     *
+     * @param file
+     */
     static void createFile(File file) {
         try {
             if (!file.createNewFile()) {
@@ -65,14 +75,25 @@ public class Repository {
         }
     }
 
+    /** creates the .gitlet directory
+     *
+     * @return true if it succeeds making the dir
+     */
     private static boolean makeGitletRepo() {
        return GITLET_DIR.mkdir();
     }
 
+    /** gives the path of the .gitlet directory
+     *
+     * @return
+     */
     private static String getRepoPath() {
         return GITLET_DIR.getPath();
     }
 
+    /** creates the .gitlet file in the current working tree
+     *
+     */
     private static void createRepository() {
         if (repoExists()) {
             System.err.println("A Gitlet version-control system already exists in the current directory.");
@@ -92,19 +113,17 @@ public class Repository {
            createFile(file);
         }
 
+        //File file  = getHead();
+        //createFile(headPtr);
     }
 
+    /** initializes the repository and sets up everything
+     *
+     */
     public static void initRepo() {
-        Repository.createRepository();
-        Commit initialCommit = createCommitObject("initial commit", Instant.EPOCH.toString());
-        createBranch(getCurrentBranch(), initialCommit.createCommit());
-        updateHead(getCurrentBranch());
+        GitletRepository.createRepository();
+        GiletCommit initialCommit = createCommitObject("initial commit", Instant.EPOCH.toString());
+        createBranch(getDefaultBranch(), initialCommit.createCommit());
+        updateHead(getDefaultBranch());
     }
-
-
-    public static void updateHead(String ref) {
-       File head =  join(GITLET_DIR,"HEAD");
-       Utils.writeContents(head, "refs/heads/" + ref);
-    }
-
 }

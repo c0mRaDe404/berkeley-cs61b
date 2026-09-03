@@ -5,8 +5,8 @@ import java.util.HashMap;
 
 import static gitlet.GitletObject.createObjectFile;
 import static gitlet.GitletObject.hashFileObject;
-import static gitlet.Repository.CWD;
-import static gitlet.Repository.GITLET_DIR;
+import static gitlet.GitletRepository.CWD;
+import static gitlet.GitletRepository.GITLET_DIR;
 import static gitlet.Utils.join;
 
 // gitlet add [filename]
@@ -20,7 +20,13 @@ import static gitlet.Utils.join;
 public class GitletIndex {
 
     private static HashMap<String, String> index = new HashMap<>();
-    private static final File INDEX_FILE = join(GITLET_DIR, "index");
+    public static final File INDEX_FILE = join(GITLET_DIR, "index");
+
+    public static HashMap<String, String> getIndex() {
+        readFromIndex();
+       return index;
+    }
+
 
     public static void addToIndex(String file) {
         String hash = hashFileObject(file);
@@ -31,9 +37,10 @@ public class GitletIndex {
         index.put(file, hash);
         writeToIndex();
     }
+
     private static void writeToIndex() {
         if (!INDEX_FILE.exists()) {
-            Repository.createFile(INDEX_FILE);
+            GitletRepository.createFile(INDEX_FILE);
         }
        Utils.writeObject(INDEX_FILE, index);
     }
