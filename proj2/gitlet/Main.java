@@ -1,8 +1,7 @@
 package gitlet;
 
 import static gitlet.GitletCommit.*;
-import static gitlet.GitletIndex.addToIndex;
-import static gitlet.GitletIndex.listFilesFromIndex;
+import static gitlet.GitletIndex.*;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author TODO
@@ -38,13 +37,13 @@ public class Main {
                 // TODO: check if a user is in a gitlet ininitialized directory, otherwise exit
                 // TODO: handle the `add [filename]` command
                 // TODO: check not only argument count, but also appropriateness
-                addToIndex(args[1]);
+                stageFile(args[1]);
                 break;
             case "commit":
                 makeCommit(args[1]);
                 break;
             case "ls-files":
-                listFilesFromIndex();
+                listIndex();
                 break;
             case "show":
                 if (args.length < 2) {

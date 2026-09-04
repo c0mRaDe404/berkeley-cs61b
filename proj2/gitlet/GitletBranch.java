@@ -2,13 +2,15 @@ package gitlet;
 
 import java.io.File;
 import static gitlet.Utils.join;
-import static gitlet.GitletRepository.GITLET_DIR;
 import static gitlet.GitletRepository.createFile;
 import static gitlet.Utils.readContentsAsString;
+import static gitlet.GitletRepository.GITLET_DIR;
+import static gitlet.GitletRepository.HEAD;
+
 
 public class GitletBranch {
     // i should only manipulate HEAD
-    public static File headPtr = join(GITLET_DIR,"HEAD");
+
     private static String currentBranch = getDefaultBranch();
 
 
@@ -17,7 +19,7 @@ public class GitletBranch {
       * @return headFile pointer
      */
     public static File getHead() {
-       return headPtr;
+       return HEAD;
     }
 
     /** gives the default branch name
@@ -33,7 +35,7 @@ public class GitletBranch {
      * @return current branch
      */
     public static String getCurrentBranch() {
-        String ref = Utils.readContentsAsString(headPtr);
+        String ref = Utils.readContentsAsString(HEAD);
         String[] branch = ref.split("/");
         return branch[branch.length - 1];
     }
@@ -42,7 +44,7 @@ public class GitletBranch {
      * @param ref
      */
     public static void updateHead(String ref) {
-        Utils.writeContents(headPtr, "refs/heads/" + ref);
+        Utils.writeContents(HEAD, "refs/heads/" + ref);
     }
 
 

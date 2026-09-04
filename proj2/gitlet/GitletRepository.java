@@ -39,6 +39,15 @@ public class GitletRepository {
      */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
+    /** the index file
+     *
+     */
+    public static final File INDEX_FILE = join(GITLET_DIR, "index");
+
+    /** the HEAD file
+     *
+      */
+    public static final File HEAD = join(GITLET_DIR,"HEAD");
 
     private static final File[] DIRS = {
             join(GITLET_DIR, "objects"),
@@ -49,7 +58,7 @@ public class GitletRepository {
     }; // order should be preserved
 
     private static final File[] FILES = {
-            headPtr
+           HEAD
     }; // order doesnt matter
 
     private static boolean repoExists() {
@@ -124,9 +133,6 @@ public class GitletRepository {
         for (File file : FILES) {
             createFile(file);
         }
-
-        //File file  = getHead();
-        //createFile(headPtr);
     }
 
     /**

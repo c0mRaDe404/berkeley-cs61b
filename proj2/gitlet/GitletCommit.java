@@ -7,7 +7,7 @@ import java.util.*;
 
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletIndex.clearIndex;
-import static gitlet.GitletIndex.getIndex;
+import static gitlet.GitletIndex.getIndexInstance;
 
 /**
  * Represents a gitlet commit object.
@@ -20,12 +20,12 @@ class GitletCommitObj extends GitletObject implements Serializable {
     final String message; // commit message
     final String time; // commit timestamp
     final List<String> parents; // parents of the commit
-    final HashMap<String, String> currentWorkingTree; // copy of the index file
+    final GitletIndex currentIndex; // copy of the index file
 
     private GitletCommitObj(String message, String time) {
         this.message = message;
         this.time = time;
-        this.currentWorkingTree = getIndex();
+        this.currentIndex = getIndexInstance();
         this.parents = new ArrayList<>();
     }
 
@@ -41,14 +41,7 @@ class GitletCommitObj extends GitletObject implements Serializable {
         return new GitletCommitObj(msg, time);
     }
 
-    /**
-     * check any files are in the staging area
-     *
-     * @return true if staging area is not empty otherwise false
-     */
-    boolean hasStagedFiles() {
-        return !currentWorkingTree.isEmpty();
-    }
+
 
     /**
      * add the commitId as a parent of the commit object
@@ -64,22 +57,7 @@ class GitletCommitObj extends GitletObject implements Serializable {
 public class GitletCommit extends GitletObject implements Serializable {
 
 
-    /**
-     * sort the index key-value pairs and concatenates them to one long string
-     *
-     * @return concatenated key-value pairs
-     */
-    private static String indexToString(GitletCommitObj commitObj) {
-        List<String> keys = new ArrayList<>(commitObj.currentWorkingTree.keySet());
-        Collections.sort(keys);
 
-        StringBuilder concatenatedKeyValuePairs = new StringBuilder();
-        for (String key : keys) {
-            concatenatedKeyValuePairs.append(key);
-            concatenatedKeyValuePairs.append(commitObj.currentWorkingTree.get(key));
-        }
-        return concatenatedKeyValuePairs.toString();
-    }
 
 
     /**
@@ -90,7 +68,7 @@ public class GitletCommit extends GitletObject implements Serializable {
      */
     public static String createCommit(GitletCommitObj commitObj) {
         String commitHash;
-        commitHash = Utils.sha1(commitObj.message, commitObj.time, indexToString(commitObj));
+        commitHash = Utils.sha1(commitObj.message, commitObj.time, commitObj.currentIndex.indexToString(commitObj));
         createCommit(commitHash, commitObj);
         return commitHash;
     }
@@ -115,9 +93,9 @@ public class GitletCommit extends GitletObject implements Serializable {
      */
     public static void makeCommit(String commitMsg) {
         GitletCommitObj commitObj = GitletCommitObj.createCommitObject(commitMsg, Instant.now().toString());
-        if (!commitObj.hasStagedFiles()) {
-            System.exit(0);
-        }
+        //if (!commitObj.currentIndex.hasStagedFiles()) {
+        //    System.exit(0);
+        //}
         commitObj.addParent(getBranchId(getCurrentBranch()));
         updateBranch(getCurrentBranch(), createCommit(commitObj));
         clearIndex();
@@ -164,7 +142,7 @@ public class GitletCommit extends GitletObject implements Serializable {
         System.out.println("message: " + commitObj.message);
         System.out.println("parent: " + commitObj.parents);
         System.out.println("timestamp: " + commitObj.time);
-        System.out.println("tree: " + commitObj.currentWorkingTree.entrySet());
+        System.out.println("tree: " + commitObj.currentIndex.INDEX.entrySet());
     }
 
     /**
