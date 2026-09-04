@@ -22,12 +22,31 @@ public class GitletIndex {
     private static HashMap<String, String> index = new HashMap<>();
     public static final File INDEX_FILE = join(GITLET_DIR, "index");
 
+    /**
+     * get the index file
+     *
+     * @return deserialized index map
+     */
     public static HashMap<String, String> getIndex() {
         readFromIndex();
-       return index;
+        return index;
     }
 
 
+    /**
+     * clears the index file
+     *
+     */
+    public static void clearIndex() {
+        index.clear();
+        writeToIndex();
+    }
+
+    /**
+     * adds a file to the index file
+     *
+     * @param file
+     */
     public static void addToIndex(String file) {
         String hash = hashFileObject(file);
         File targetFile = createObjectFile(hash);
@@ -38,13 +57,21 @@ public class GitletIndex {
         writeToIndex();
     }
 
+    /**
+     * helper for serializing the index object
+     *
+     */
     private static void writeToIndex() {
         if (!INDEX_FILE.exists()) {
             GitletRepository.createFile(INDEX_FILE);
         }
-       Utils.writeObject(INDEX_FILE, index);
+        Utils.writeObject(INDEX_FILE, index);
     }
 
+    /**
+     * helper for deserializing index file
+     *
+     */
     private static void readFromIndex() {
         if (!INDEX_FILE.exists()) {
             return;
@@ -52,15 +79,24 @@ public class GitletIndex {
         index = Utils.readObject(INDEX_FILE, HashMap.class);
     }
 
-    public static void removeFromIndex(String file){
+    /**
+     * unstages a file
+     *
+     * @param file
+     */
+    public static void removeFromIndex(String file) {
         readFromIndex();
         index.remove(file, hashFileObject(file));
         writeToIndex();
     }
 
+    /**
+     * list contents in the index file (for debugging purposes)
+     *
+     */
     public static void listFilesFromIndex() {
         readFromIndex();
-        for (Object file: index.keySet()) {
+        for (Object file : index.keySet()) {
             System.out.println(file);
         }
     }

@@ -1,6 +1,6 @@
 package gitlet;
 
-import static gitlet.GiletCommit.*;
+import static gitlet.GitletCommit.*;
 import static gitlet.GitletIndex.addToIndex;
 import static gitlet.GitletIndex.listFilesFromIndex;
 
@@ -50,7 +50,7 @@ public class Main {
                 if (args.length < 2) {
                     showLatestCommit();
                 } else {
-                    showCommit(args[1]);
+                    showCommit(args[1], getCommit(args[1]));
                 }
                 break;
             case "hash-object":
