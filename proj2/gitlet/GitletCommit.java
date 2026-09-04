@@ -51,6 +51,10 @@ class GitletCommitObj extends GitletObject implements Serializable {
     void addParent(String commitId) {
         parents.add(commitId);
     }
+
+    GitletIndex getCommitIndex() {
+       return currentIndex;
+    }
 }
 
 
@@ -68,7 +72,7 @@ public class GitletCommit extends GitletObject implements Serializable {
      */
     public static String createCommit(GitletCommitObj commitObj) {
         String commitHash;
-        commitHash = Utils.sha1(commitObj.message, commitObj.time, commitObj.currentIndex.indexToString(commitObj));
+        commitHash = Utils.sha1(commitObj.message, commitObj.time, commitObj.getCommitIndex().indexToString(commitObj));
         createCommit(commitHash, commitObj);
         return commitHash;
     }
@@ -93,9 +97,13 @@ public class GitletCommit extends GitletObject implements Serializable {
      */
     public static void makeCommit(String commitMsg) {
         GitletCommitObj commitObj = GitletCommitObj.createCommitObject(commitMsg, Instant.now().toString());
-        //if (!commitObj.currentIndex.hasStagedFiles()) {
-        //    System.exit(0);
-        //}
+
+        System.out.println(commitObj.currentIndex.INDEX);
+        if (!commitObj.currentIndex.hasStagedFiles()) {
+
+           System.exit(0);
+        }
+
         commitObj.addParent(getBranchId(getCurrentBranch()));
         updateBranch(getCurrentBranch(), createCommit(commitObj));
         clearIndex();
