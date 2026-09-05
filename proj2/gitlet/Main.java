@@ -39,11 +39,23 @@ public class Main {
                 // TODO: check not only argument count, but also appropriateness
                 stageFile(args[1]);
                 break;
+            case "rm":
+                removeFile(args[1]);
+                break;
+            case "log":
+                printLog(getCurrentCommit());
+                break;
             case "commit":
+
+                if (args.length < 2) {
+                   System.out.println("Please enter a commit message.");
+                   System.exit(0);
+                }
                 makeCommit(args[1]);
                 break;
             case "ls-files":
-                listIndex();
+                //listIndex();
+                System.out.println(getIndexInstance().INDEX);
                 break;
             case "show":
                 if (args.length < 2) {

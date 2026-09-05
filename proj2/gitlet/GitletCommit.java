@@ -8,6 +8,8 @@ import java.util.*;
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletIndex.clearIndex;
 import static gitlet.GitletIndex.getIndexInstance;
+import static gitlet.GitletObject.createObjectFile;
+import static gitlet.GitletObject.getObjectPath;
 
 /**
  * Represents a gitlet commit object.
@@ -17,15 +19,16 @@ import static gitlet.GitletIndex.getIndexInstance;
 
 class GitletCommitObj extends GitletObject implements Serializable {
 
-    final String message; // commit message
-    final String time; // commit timestamp
-    final List<String> parents; // parents of the commit
-    final GitletIndex currentIndex; // copy of the index file
+    private String message; // commit message
+    private String time; // commit timestamp
+    private List<String> parents; // parents of the commit
+    private GitletIndex snapshot; // copy of the index file
 
-    private GitletCommitObj(String message, String time) {
+    private GitletCommitObj(String message, String time, GitletIndex index) {
         this.message = message;
         this.time = time;
-        this.currentIndex = getIndexInstance();
+        //get commit snapshot
+        this.snapshot = GitletCommit.getCommitSnapshot(index);
         this.parents = new ArrayList<>();
     }
 
@@ -38,10 +41,12 @@ class GitletCommitObj extends GitletObject implements Serializable {
      */
 
     public static GitletCommitObj createCommitObject(String msg, String time) {
-        return new GitletCommitObj(msg, time);
+        return new GitletCommitObj(msg, time, getIndexInstance());
     }
 
-
+    public static GitletCommitObj createCommitObject(String msg, String time, GitletIndex index) {
+        return new GitletCommitObj(msg, time, index);
+    }
 
     /**
      * add the commitId as a parent of the commit object
@@ -52,17 +57,27 @@ class GitletCommitObj extends GitletObject implements Serializable {
         parents.add(commitId);
     }
 
-    GitletIndex getCommitIndex() {
-       return currentIndex;
+
+    String getMsg() {
+        return message;
     }
+
+    String getTimestamp() {
+        return time;
+    }
+
+    List<String> getParents() {
+        return parents;
+    }
+
+    GitletIndex getSnapshot() {
+        return snapshot;
+    }
+
 }
 
 
-public class GitletCommit extends GitletObject implements Serializable {
-
-
-
-
+public class GitletCommit {
 
     /**
      * creates an empty commit with the given message and time
@@ -72,11 +87,32 @@ public class GitletCommit extends GitletObject implements Serializable {
      */
     public static String createCommit(GitletCommitObj commitObj) {
         String commitHash;
-        commitHash = Utils.sha1(commitObj.message, commitObj.time, commitObj.getCommitIndex().indexToString(commitObj));
+        commitHash = Utils.sha1(commitObj.getMsg(), commitObj.getTimestamp(),
+                commitObj.getSnapshot().indexToString(commitObj));
         createCommit(commitHash, commitObj);
         return commitHash;
     }
 
+
+    public static GitletIndex getCommitSnapshot(GitletIndex index) {
+        GitletCommitObj currentCommitObj = getCurrentCommit();
+
+        if (currentCommitObj == null) {
+            return getIndexInstance();
+        } else {
+            HashMap<String, String> newSnapshot = new HashMap<>(currentCommitObj.getSnapshot().getIndexPair());
+
+            for (Map.Entry<String, String> pair : index.getIndexPair().entrySet()) {
+                if (pair.getValue() == null) {
+                    newSnapshot.remove(pair.getKey());
+                    continue;
+                }
+                newSnapshot.put(pair.getKey(), pair.getValue());
+            }
+
+            return getIndexInstance(newSnapshot);
+        }
+    }
 
     /**
      * uses commit hash to create a commit object file
@@ -96,14 +132,15 @@ public class GitletCommit extends GitletObject implements Serializable {
      * @param commitMsg
      */
     public static void makeCommit(String commitMsg) {
-        GitletCommitObj commitObj = GitletCommitObj.createCommitObject(commitMsg, Instant.now().toString());
 
-        System.out.println(commitObj.currentIndex.INDEX);
-        if (!commitObj.currentIndex.hasStagedFiles()) {
+        GitletIndex currentIndex = getIndexInstance(); // fetch the current index object
 
-           System.exit(0);
+        if (!currentIndex.hasStagedFiles()) { // is there some way to prevent multiple index file reads? nvm
+            System.err.println("No changes added to the commit.");
+            System.exit(0);
         }
 
+        GitletCommitObj commitObj = GitletCommitObj.createCommitObject(commitMsg, Instant.now().toString(), currentIndex);
         commitObj.addParent(getBranchId(getCurrentBranch()));
         updateBranch(getCurrentBranch(), createCommit(commitObj));
         clearIndex();
@@ -116,7 +153,11 @@ public class GitletCommit extends GitletObject implements Serializable {
      * @return gitlet commit object
      */
     private static GitletCommitObj readCommitObject(String commitId) {
-        return Utils.readObject(getObjectPath(commitId), GitletCommitObj.class);
+        File commitObjPath = getObjectPath(commitId);
+        if (!commitObjPath.exists()) {
+            return null;
+        }
+        return Utils.readObject(commitObjPath, GitletCommitObj.class);
     }
 
     /**
@@ -126,6 +167,9 @@ public class GitletCommit extends GitletObject implements Serializable {
      * @return a commit object
      */
     public static GitletCommitObj getCommit(String commitId) {
+        if (commitId == null) {
+            return null;
+        }
         return readCommitObject(commitId);
     }
 
@@ -147,10 +191,10 @@ public class GitletCommit extends GitletObject implements Serializable {
      */
     public static void showCommit(String commitId, GitletCommitObj commitObj) {
         System.out.println("commit " + commitId);
-        System.out.println("message: " + commitObj.message);
-        System.out.println("parent: " + commitObj.parents);
-        System.out.println("timestamp: " + commitObj.time);
-        System.out.println("tree: " + commitObj.currentIndex.INDEX.entrySet());
+        System.out.println("message: " + commitObj.getMsg());
+        System.out.println("parent: " + commitObj.getParents());
+        System.out.println("timestamp: " + commitObj.getTimestamp());
+        System.out.println("tree: " + commitObj.getSnapshot().getIndexPair());
     }
 
     /**
@@ -160,5 +204,14 @@ public class GitletCommit extends GitletObject implements Serializable {
     public static void showLatestCommit() {
         String commitId = getBranchId(getCurrentBranch());
         showCommit(commitId, getCurrentCommit());
+    }
+
+
+    public static void printLog(GitletCommitObj current) {
+        if (current.getParents().isEmpty()) {
+            return;
+        }
+       showCommit("summa", current);
+       printLog(current.getParents().get(0));
     }
 }

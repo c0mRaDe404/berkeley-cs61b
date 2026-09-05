@@ -10,10 +10,8 @@ import java.util.List;
 import static gitlet.GitletCommit.getCurrentCommit;
 import static gitlet.GitletObject.createObjectFile;
 import static gitlet.GitletObject.hashFileObject;
-import static gitlet.GitletRepository.CWD;
+import static gitlet.GitletRepository.*;
 import static gitlet.Utils.join;
-import static gitlet.GitletRepository.INDEX_FILE;
-
 
 
 public class GitletIndex implements Serializable {
@@ -25,15 +23,22 @@ public class GitletIndex implements Serializable {
         INDEX = new HashMap<>();
     }
 
+    private GitletIndex(HashMap<String, String> map) {
+        INDEX = map;
+    }
+
     public String getIndexEntry(String key) {
-       return INDEX.get(key);
+        return INDEX.get(key);
     }
 
 
+    public boolean isTracked(String file) {
+        return hasEntry(file) || getCurrentCommit().getSnapshot().hasEntry(file);
+    }
 
     public boolean isModified(String file) {
         GitletCommitObj currentCommit = getCurrentCommit();
-        String fileId = currentCommit.currentIndex.getIndexEntry(file);
+        String fileId = currentCommit.getSnapshot().getIndexEntry(file);
         if (hashFileObject(file).equals(fileId)) {
             return false;
         }
@@ -41,14 +46,14 @@ public class GitletIndex implements Serializable {
     }
 
 
-    public boolean isStaged(String file) {
-       return INDEX.containsKey(file);
+    public boolean hasEntry(String file) {
+        return INDEX.containsKey(file);
     }
 
     public static void stageFile(String file) {
         GitletIndex index = getIndexInstance();
         if (!index.isModified(file)) {
-            if (index.isStaged(file)) {
+            if (index.hasEntry(file)) {
                 System.out.print("i am here");
                 index.removeFromIndex(file);
             }
@@ -58,11 +63,35 @@ public class GitletIndex implements Serializable {
 
     }
 
+    public static void removeFile(String file) {
+
+        GitletIndex index = getIndexInstance();
+
+        if (index.isTracked(file)) { // if a file is tracked
+            if (index.hasEntry(file)) { // if it's in index
+                index.removeFromIndex(file);
+            }
+
+            if (getCurrentCommit().getSnapshot().hasEntry(file)) { // if it's in the current commit
+                index.updateIndex(file, null);
+            }
+
+            File targetFile = join(CWD, file);
+            deleteFile(targetFile);
+        }
+
+    }
+
     public static GitletIndex getIndexInstance() {
         GitletIndex index = new GitletIndex();
         index.readFromIndex();
         return index;
     }
+
+    public static GitletIndex getIndexInstance(HashMap<String, String> index) {
+        return new GitletIndex(index);
+    }
+
 
     public static void listIndex() {
         GitletIndex index = new GitletIndex();
@@ -98,17 +127,20 @@ public class GitletIndex implements Serializable {
     public void addToIndex(String file) {
         File sourceFile = join(CWD, file);
         if (!sourceFile.exists()) {
-           System.err.println("File does not exist.");
-           System.exit(0);
+            System.err.println("File does not exist.");
+            System.exit(0);
         }
         String hash = hashFileObject(file);
         File targetFile = createObjectFile(hash);
         Utils.writeContents(targetFile, Utils.readContentsAsString(sourceFile));
-        readFromIndex();
-        INDEX.put(file, hash);
-        writeToIndex();
+        updateIndex(file, hash);
     }
 
+    private void updateIndex(String key, String value) {
+        readFromIndex();
+        INDEX.put(key, value);
+        writeToIndex();
+    }
 
     private boolean indexExists() {
         return INDEX_FILE.exists();
@@ -161,7 +193,7 @@ public class GitletIndex implements Serializable {
      * @return concatenated key-value pairs
      */
     public String indexToString(GitletCommitObj commitObj) {
-        GitletIndex index = commitObj.currentIndex;
+        GitletIndex index = commitObj.getSnapshot();
         List<String> keys = new ArrayList<>(index.INDEX.keySet());
         Collections.sort(keys);
 
@@ -184,6 +216,6 @@ public class GitletIndex implements Serializable {
     }
 
     HashMap<String, String> getIndexPair() {
-       return INDEX;
+        return INDEX;
     }
 }

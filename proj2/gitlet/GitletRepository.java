@@ -39,15 +39,17 @@ public class GitletRepository {
      */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
-    /** the index file
+    /**
+     * the index file
      *
      */
     public static final File INDEX_FILE = join(GITLET_DIR, "index");
 
-    /** the HEAD file
+    /**
+     * the HEAD file
      *
-      */
-    public static final File HEAD = join(GITLET_DIR,"HEAD");
+     */
+    public static final File HEAD = join(GITLET_DIR, "HEAD");
 
     private static final File[] DIRS = {
             join(GITLET_DIR, "objects"),
@@ -58,7 +60,7 @@ public class GitletRepository {
     }; // order should be preserved
 
     private static final File[] FILES = {
-           HEAD
+            HEAD
     }; // order doesnt matter
 
     private static boolean repoExists() {
@@ -92,6 +94,14 @@ public class GitletRepository {
             throw new RuntimeException(e);
         }
     }
+
+
+     static boolean deleteFile(File file) {
+        if (file.exists()) {
+            return file.delete();
+        }
+        return false;
+     }
 
     /**
      * creates the .gitlet directory
@@ -140,9 +150,12 @@ public class GitletRepository {
      *
      */
     public static void initRepo() {
-        GitletRepository.createRepository();
-        GitletCommitObj initialCommit = createCommitObject("initial commit", Instant.EPOCH.toString());
-        createBranch(getDefaultBranch(), createCommit(initialCommit));
-        updateHead(getDefaultBranch());
+        GitletRepository.createRepository(); // initialize the .gitlet repo
+        updateHead(getDefaultBranch()); // initializing head with default branch
+
+        GitletCommitObj initialCommit = createCommitObject("initial commit",
+                Instant.EPOCH.toString()); // creating the initial commit
+        createBranch(getDefaultBranch(), createCommit(initialCommit)); // create the default branch and add the commit id
+
     }
 }
