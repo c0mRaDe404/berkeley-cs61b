@@ -3,6 +3,8 @@ package gitlet;
 import java.io.File;
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static gitlet.GitletBranch.*;
@@ -10,6 +12,7 @@ import static gitlet.GitletIndex.clearIndex;
 import static gitlet.GitletIndex.getIndexInstance;
 import static gitlet.GitletObject.createObjectFile;
 import static gitlet.GitletObject.getObjectPath;
+import static gitlet.Utils.getFormattedTime;
 
 /**
  * Represents a gitlet commit object.
@@ -140,7 +143,7 @@ public class GitletCommit {
             System.exit(0);
         }
 
-        GitletCommitObj commitObj = GitletCommitObj.createCommitObject(commitMsg, Instant.now().toString(), currentIndex);
+        GitletCommitObj commitObj = GitletCommitObj.createCommitObject(commitMsg, getFormattedTime(new Date()), currentIndex);
         commitObj.addParent(getBranchId(getCurrentBranch()));
         updateBranch(getCurrentBranch(), createCommit(commitObj));
         clearIndex();
@@ -190,11 +193,12 @@ public class GitletCommit {
      * @param commitObj
      */
     public static void showCommit(String commitId, GitletCommitObj commitObj) {
+        System.out.println("===");
         System.out.println("commit " + commitId);
-        System.out.println("message: " + commitObj.getMsg());
-        System.out.println("parent: " + commitObj.getParents());
-        System.out.println("timestamp: " + commitObj.getTimestamp());
-        System.out.println("tree: " + commitObj.getSnapshot().getIndexPair());
+        System.out.println("Date: "+ commitObj.getTimestamp());
+        System.out.println(commitObj.getMsg());
+        System.out.println();
+
     }
 
     /**
@@ -207,11 +211,18 @@ public class GitletCommit {
     }
 
 
-    public static void printLog(GitletCommitObj current) {
-        if (current.getParents().isEmpty()) {
-            return;
+    public static void printLog(String id) {
+
+        String currentId = id;
+        GitletCommitObj currentObj = getCommit(id);
+        List<String> parent = currentObj.getParents();
+
+        while (!parent.isEmpty()) {
+            showCommit(currentId, currentObj);
+            currentId = currentObj.getParents().get(0);
+            currentObj = getCommit(currentId);
+            parent = currentObj.getParents();
         }
-       showCommit("summa", current);
-       printLog(current.getParents().get(0));
+        showCommit(currentId, currentObj);
     }
 }

@@ -14,9 +14,7 @@ import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Formatter;
-import java.util.List;
+import java.util.*;
 
 
 /** Assorted utilities.
@@ -236,4 +234,19 @@ class Utils {
         System.out.printf(msg, args);
         System.out.println();
     }
+
+
+    /** Return formatted date
+     *
+     * @param date
+     * @return formatted date
+     */
+    static String getFormattedTime(Date date) {
+        TimeZone.setDefault(TimeZone.getTimeZone("IST")); // get Indian Standard Time
+
+        return String.format(Locale.US,
+                "%ta %tb %td %tT %tY %tz",
+                date, date, date, date, date, date);
+    }
+
 }

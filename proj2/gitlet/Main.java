@@ -1,5 +1,6 @@
 package gitlet;
 
+import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.*;
 import static gitlet.GitletIndex.*;
 
@@ -42,11 +43,20 @@ public class Main {
             case "rm":
                 removeFile(args[1]);
                 break;
+            case "branch":
+                if (args.length < 2) {
+                   listBranches();
+                   System.exit(0);
+                }
+                createBranch(args[1]);
+                break;
+            case "rm-branch":
+                removeBranch(args[1]);
+                break;
             case "log":
-                printLog(getCurrentCommit());
+                printLog(getBranchId(getCurrentBranch()));
                 break;
             case "commit":
-
                 if (args.length < 2) {
                    System.out.println("Please enter a commit message.");
                    System.exit(0);

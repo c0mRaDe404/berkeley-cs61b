@@ -54,7 +54,6 @@ public class GitletIndex implements Serializable {
         GitletIndex index = getIndexInstance();
         if (!index.isModified(file)) {
             if (index.hasEntry(file)) {
-                System.out.print("i am here");
                 index.removeFromIndex(file);
             }
         } else {
@@ -74,10 +73,12 @@ public class GitletIndex implements Serializable {
 
             if (getCurrentCommit().getSnapshot().hasEntry(file)) { // if it's in the current commit
                 index.updateIndex(file, null);
+                File targetFile = join(CWD, file);
+                deleteFile(targetFile);
             }
-
-            File targetFile = join(CWD, file);
-            deleteFile(targetFile);
+        } else {
+            System.err.println("No reason to remove the file.");
+            System.exit(0);
         }
 
     }

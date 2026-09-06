@@ -3,6 +3,7 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Date;
 
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.createCommit;
@@ -154,7 +155,7 @@ public class GitletRepository {
         updateHead(getDefaultBranch()); // initializing head with default branch
 
         GitletCommitObj initialCommit = createCommitObject("initial commit",
-                Instant.EPOCH.toString()); // creating the initial commit
+               getFormattedTime(new Date(0))); // creating the initial commit
         createBranch(getDefaultBranch(), createCommit(initialCommit)); // create the default branch and add the commit id
 
     }

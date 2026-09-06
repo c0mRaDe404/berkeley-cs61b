@@ -1,19 +1,18 @@
 package gitlet;
 
 import java.io.File;
+import java.util.Objects;
 
+import static gitlet.GitletRepository.*;
 import static gitlet.Utils.join;
-import static gitlet.GitletRepository.createFile;
 import static gitlet.Utils.readContentsAsString;
-import static gitlet.GitletRepository.GITLET_DIR;
-import static gitlet.GitletRepository.HEAD;
 
 
 public class GitletBranch {
     // i should only manipulate HEAD
 
     private static String currentBranch = getDefaultBranch();
-
+    private static File REF_DIR =  join(GITLET_DIR, "refs", "heads");
 
     /**
      * gives the HEAD file
@@ -70,6 +69,38 @@ public class GitletBranch {
         Utils.writeContents(branch, commitId);
     }
 
+    public static void createBranch(String branchName) {
+        createBranch(branchName, getBranchId(getCurrentBranch()));
+    }
+
+
+    public static void listBranches() {
+        // what if ../refs/heads got deleted?
+        for (File file : Objects.requireNonNull(REF_DIR.listFiles())) {
+            if (file.isFile()) {
+                System.out.println(file.getName());
+            }
+        }
+    }
+
+    /** just removes the given branch
+     *
+      * @param branchName
+     */
+    public static void removeBranch(String branchName) {
+        File branch = getBranchFile(branchName);
+        if (!branch.exists()) {
+           System.err.println("A branch with that name does not exist.");
+           System.exit(0);
+        }
+
+        if (getCurrentBranch().equals(branchName)) {
+           System.err.println("Cannot remove the current branch.");
+           System.exit(0);
+        }
+        deleteFile(branch);
+    }
+
     /**
      * updates the specified branch with the given commitId
      *
@@ -105,4 +136,17 @@ public class GitletBranch {
         return null;
     }
 
+    public static void switchBranch(String branchName) {
+        // what if branch doesnt exist? handle that
+        if (!getBranchFile(branchName).exists()) {
+           System.err.println("No such branch exists.");
+           System.exit(0);
+        }
+
+        if (getCurrentBranch().equals(branchName)) {
+           System.err.println();
+        }
+        updateHead(branchName);
+        System.out.println("Switched to branch" + "'" + branchName + "'");
+    }
 }
