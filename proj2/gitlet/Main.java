@@ -1,5 +1,7 @@
 package gitlet;
 
+import java.io.IOException;
+
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.*;
 import static gitlet.GitletIndex.*;
@@ -22,7 +24,7 @@ public class Main {
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND1> <OPERAND2> ... 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // TODO: what if args is empty?
         if (args.length < 1) {
           printError("Please enter a command.");
@@ -55,6 +57,12 @@ public class Main {
                 break;
             case "log":
                 printLog(getBranchId(getCurrentBranch()));
+                break;
+            case "global-log":
+                printGlobalLog();
+                break;
+            case "find":
+                findCommit(args[1]);
                 break;
             case "commit":
                 if (args.length < 2) {

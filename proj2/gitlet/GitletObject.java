@@ -25,20 +25,28 @@ public class GitletObject {
        return Utils.sha1(contents);
     }
 
-    public static File getObjectPath(String commitId) {
-       String objParent = commitId.substring(0, 2);
-       String objFile = commitId.substring(2);
-       return join(OBJ_DIR, objParent, objFile);
+    public static File getObjDir(String type) {
+        return join(OBJ_DIR, type);
     }
 
-    public static File createObjectFile(String commitId) {
-        File targetDir = join(OBJ_DIR, commitId.substring(0, 2));
+    public static File getObjectPath(String type, String commitId) {
+       String objParent = commitId.substring(0, 2);
+       String objFile = commitId.substring(2);
+       return join(OBJ_DIR, type, objParent, objFile);
+    }
+
+    public static File createObjectFile(String type, String commitId) {
+        File targetDir = join(OBJ_DIR, type, commitId.substring(0, 2));
         File targetFile = join(targetDir, commitId.substring(2));
-        if (!targetDir.exists()) {
-            GitletRepository.createDirectory(targetDir);
-        }
-        if (!targetFile.exists()) {
-            GitletRepository.createFile(targetFile);
+        try {
+            if (!targetDir.exists()) {
+                GitletRepository.createDirectory(targetDir);
+            }
+            if (!targetFile.exists()) {
+                GitletRepository.createFile(targetFile);
+            }
+        } catch (GitletException e) {
+           e.printStackTrace();
         }
         return targetFile;
     }

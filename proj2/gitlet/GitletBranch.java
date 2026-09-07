@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 
 import static gitlet.GitletRepository.*;
@@ -23,6 +24,10 @@ public class GitletBranch {
         return HEAD;
     }
 
+    public static List<String> getBranches() {
+       return Utils.plainFilenamesIn(REF_DIR);
+    }
+
     /**
      * gives the default branch name
      *
@@ -42,9 +47,8 @@ public class GitletBranch {
             System.err.println("no reference found in HEAD.");
             System.exit(0);
         }
-        String ref = Utils.readContentsAsString(HEAD);
-        String[] branch = ref.split("/");
-        return branch[branch.length - 1];
+        File ref = new File(Utils.readContentsAsString(HEAD));
+        return ref.getName();
     }
 
     /**

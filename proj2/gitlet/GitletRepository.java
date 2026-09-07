@@ -3,10 +3,11 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
+import java.util.*;
 
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.createCommit;
+import static gitlet.GitletCommit.getCurrentCommit;
 import static gitlet.GitletCommitObj.createCommitObject;
 import static gitlet.Utils.*;
 
@@ -74,9 +75,8 @@ public class GitletRepository {
      * @param dir
      */
     static void createDirectory(File dir) {
-        if (!dir.mkdir()) {
-            System.out.println("Can't setup the" + dir.getPath() + " directory!");
-            System.exit(0);
+        if (!dir.mkdirs()) {
+            throw new GitletException("Can't setup the" + dir.getPath() + " directory");
         }
     }
 
@@ -88,11 +88,10 @@ public class GitletRepository {
     static void createFile(File file) {
         try {
             if (!file.createNewFile()) {
-                System.out.println("Can't setup the" + file.getPath() + " file!");
-                System.exit(0);
+                throw new GitletException("Can't setup the" + file.getPath() + " file!");
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException | GitletException e) {
+            throw new GitletException(e.getMessage());
         }
     }
 
@@ -159,4 +158,32 @@ public class GitletRepository {
         createBranch(getDefaultBranch(), createCommit(initialCommit)); // create the default branch and add the commit id
 
     }
+
+    public static void showBranchStatus() {
+        System.out.println("=== Branches ===");
+        String curBranch = getCurrentBranch();
+        for (String branch: getBranches()) {
+            if (curBranch.equals(branch)) {
+                System.out.println("*" + branch );
+            } else {
+                System.out.println(branch);
+            }
+        }
+    }
+
+
+    private static void printStatus(String header, Set<String> files) {
+        System.out.println("===" + header + "===");
+        for (String file: files) {
+           System.out.println(file);
+        }
+        System.out.println();
+    }
+
+
+
 }
+
+
+
+

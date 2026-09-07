@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -10,8 +11,7 @@ import java.util.*;
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletIndex.clearIndex;
 import static gitlet.GitletIndex.getIndexInstance;
-import static gitlet.GitletObject.createObjectFile;
-import static gitlet.GitletObject.getObjectPath;
+import static gitlet.GitletObject.*;
 import static gitlet.Utils.getFormattedTime;
 
 /**
@@ -124,7 +124,7 @@ public class GitletCommit {
      * @param commitObj
      */
     private static void createCommit(String commitHash, GitletCommitObj commitObj) {
-        File targetFile = createObjectFile(commitHash);
+        File targetFile = createObjectFile("commit", commitHash);
         Utils.writeObject(targetFile, commitObj);
     }
 
@@ -156,7 +156,7 @@ public class GitletCommit {
      * @return gitlet commit object
      */
     private static GitletCommitObj readCommitObject(String commitId) {
-        File commitObjPath = getObjectPath(commitId);
+        File commitObjPath = getObjectPath("commit", commitId);
         if (!commitObjPath.exists()) {
             return null;
         }
@@ -225,4 +225,40 @@ public class GitletCommit {
         }
         showCommit(currentId, currentObj);
     }
+
+    public static void printGlobalLog() {
+       for (File dir: Objects.requireNonNull(getObjDir("commit").listFiles())) {
+            if (dir.isDirectory()) {
+                for (String file: Objects.requireNonNull(Utils.plainFilenamesIn(dir))) {
+                    String commitId = dir.getName() + file;
+                    showCommit(commitId, getCommit(commitId));
+                }
+            }
+       }
+    }
+
+    public static void findCommit(String msg) {
+        boolean found = false; // set to true at least one commit matches
+        for (File dir: Objects.requireNonNull(getObjDir("commit").listFiles())) {
+            if (dir.isDirectory()) {
+                for (String file: Objects.requireNonNull(Utils.plainFilenamesIn(dir))) {
+                    String commitId = dir.getName() + file;
+                    if (getCommit(commitId).getMsg().equals(msg)) {
+                        found = true;
+                        System.out.println(commitId);
+                    }
+                }
+            }
+        }
+        if (!found) {
+            System.err.println("Found no commit with that message.");
+            System.exit(0);
+        }
+    }
+
 }
+
+
+
+
+

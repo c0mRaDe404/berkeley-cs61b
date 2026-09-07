@@ -132,7 +132,7 @@ public class GitletIndex implements Serializable {
             System.exit(0);
         }
         String hash = hashFileObject(file);
-        File targetFile = createObjectFile(hash);
+        File targetFile = createObjectFile("blob", hash);
         Utils.writeContents(targetFile, Utils.readContentsAsString(sourceFile));
         updateIndex(file, hash);
     }
