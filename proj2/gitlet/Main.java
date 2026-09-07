@@ -55,6 +55,8 @@ public class Main {
             case "rm-branch":
                 removeBranch(args[1]);
                 break;
+            case "checkout":
+               checkoutBranch(args[1]);
             case "log":
                 printLog(getBranchId(getCurrentBranch()));
                 break;

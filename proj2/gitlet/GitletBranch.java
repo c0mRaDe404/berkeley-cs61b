@@ -2,8 +2,11 @@ package gitlet;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
+import static gitlet.GitletCommit.getCommit;
+import static gitlet.GitletObject.getObjectPath;
 import static gitlet.GitletRepository.*;
 import static gitlet.Utils.join;
 import static gitlet.Utils.readContentsAsString;
@@ -140,17 +143,24 @@ public class GitletBranch {
         return null;
     }
 
-    public static void switchBranch(String branchName) {
-        // what if branch doesnt exist? handle that
-        if (!getBranchFile(branchName).exists()) {
-           System.err.println("No such branch exists.");
-           System.exit(0);
-        }
 
-        if (getCurrentBranch().equals(branchName)) {
-           System.err.println();
-        }
-        updateHead(branchName);
-        System.out.println("Switched to branch" + "'" + branchName + "'");
+    public static void checkoutBranch(String branchName) {
+       checkoutCommit(getBranchId(branchName));
+       updateHead(branchName);
     }
+
+   public static void checkoutCommit(String commitId) {
+       GitletCommitObj commitObj = getCommit(commitId);
+       GitletIndex snapshot = commitObj.getSnapshot();
+
+       for (String file: Utils.plainFilenamesIn(CWD)) {
+           Utils.restrictedDelete(join(CWD, file)); // delete cwd
+       }
+
+       for (Map.Entry<String, String> pair: snapshot.getIndexPair().entrySet()) {
+           File newFile = join(CWD, pair.getKey());
+          createFile(newFile);
+          Utils.writeContents(newFile, readContentsAsString(getObjectPath("blob", pair.getValue())));
+       }
+   }
 }
