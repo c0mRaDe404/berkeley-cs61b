@@ -36,13 +36,27 @@ public class GitletIndex implements Serializable {
         return hasEntry(file) || getCurrentCommit().getSnapshot().hasEntry(file);
     }
 
+
+    public boolean isRemoved(String file) {
+        // deleted after the recent commit (unstaged deletion)
+        // removed after staging (unstaged deletion)
+        boolean fileExists = join(CWD, file).exists();
+        return (getCurrentCommit().getSnapshot().hasEntry(file) && !fileExists) ||
+                (getIndexInstance().hasEntry(file) && !fileExists);
+    }
+
     public boolean isModified(String file) {
+        // changed since the recent commit (unstaged modification)
+        // changed after staging (unstaged modification)
+
         GitletCommitObj currentCommit = getCurrentCommit();
-        String fileId = currentCommit.getSnapshot().getIndexEntry(file);
-        if (hashFileObject(file).equals(fileId)) {
-            return false;
-        }
-        return true;
+        GitletIndex currentIndex = getIndexInstance();
+
+        String fileIdCommit = currentCommit.getSnapshot().getIndexEntry(file);
+        String fileIdIndex = currentIndex.getIndexEntry(file);
+        String fileIdWorkingTree = hashFileObject(file);
+
+        return !fileIdWorkingTree.equals(fileIdCommit) || !fileIdWorkingTree.equals(fileIdIndex);
     }
 
 

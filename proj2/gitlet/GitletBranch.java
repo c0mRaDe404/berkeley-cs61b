@@ -4,8 +4,11 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import static gitlet.GitletCommit.getCommit;
+import static gitlet.GitletIndex.clearIndex;
+import static gitlet.GitletObject.getObjPathComplete;
 import static gitlet.GitletObject.getObjectPath;
 import static gitlet.GitletRepository.*;
 import static gitlet.Utils.join;
@@ -16,7 +19,7 @@ public class GitletBranch {
     // i should only manipulate HEAD
 
     private static String currentBranch = getDefaultBranch();
-    private static File REF_DIR =  join(GITLET_DIR, "refs", "heads");
+    private static File REF_DIR = join(GITLET_DIR, "refs", "heads");
 
     /**
      * gives the HEAD file
@@ -28,7 +31,7 @@ public class GitletBranch {
     }
 
     public static List<String> getBranches() {
-       return Utils.plainFilenamesIn(REF_DIR);
+        return Utils.plainFilenamesIn(REF_DIR);
     }
 
     /**
@@ -85,25 +88,30 @@ public class GitletBranch {
         // what if ../refs/heads got deleted?
         for (File file : Objects.requireNonNull(REF_DIR.listFiles())) {
             if (file.isFile()) {
-                System.out.println(file.getName());
+                if (file.getName().equals(getCurrentBranch())) {
+                    System.out.println("*" + file.getName());
+                } else {
+                    System.out.println(file.getName());
+                }
             }
         }
     }
 
-    /** just removes the given branch
+    /**
+     * just removes the given branch
      *
-      * @param branchName
+     * @param branchName
      */
     public static void removeBranch(String branchName) {
         File branch = getBranchFile(branchName);
         if (!branch.exists()) {
-           System.err.println("A branch with that name does not exist.");
-           System.exit(0);
+            System.err.println("A branch with that name does not exist.");
+            System.exit(0);
         }
 
         if (getCurrentBranch().equals(branchName)) {
-           System.err.println("Cannot remove the current branch.");
-           System.exit(0);
+            System.err.println("Cannot remove the current branch.");
+            System.exit(0);
         }
         deleteFile(branch);
     }
@@ -137,30 +145,98 @@ public class GitletBranch {
      */
     public static String getBranchId(String branchName) {
         File branch = getBranchFile(branchName);
-        if (branch.exists()) {
-            return readContentsAsString(branch);
+        if (!branch.exists()) {
+            return null;
         }
-        return null;
+        return readContentsAsString(branch);
     }
 
+
+    private static boolean untrackedExists() {
+        GitletIndex index = GitletIndex.getIndexInstance();
+        for (String file : Utils.plainFilenamesIn(CWD)) {
+            if (!index.isTracked(file)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void checkUntracked() {
+        if (untrackedExists()) {
+            System.err.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.exit(0);
+        }
+    }
+
+    public static void checkBranchValidity(String branchId) {
+        if (branchId == null) {
+            System.err.println("No such branch exists.");
+            System.exit(0);
+        }
+    }
+
+
+    public static void resetBranch(String commitId) {
+        checkUntracked();
+        commitId = getObjPathComplete("commit", commitId);
+
+        if (commitId == null) {
+            System.err.println("No commit with that id exists.");
+            System.exit(0);
+        }
+
+        GitletCommitObj commitObj = getCommit(commitId);
+        checkoutCommit(commitObj);
+        updateBranch(getCurrentBranch(), commitId);
+        clearIndex();
+    }
 
     public static void checkoutBranch(String branchName) {
-       checkoutCommit(getBranchId(branchName));
-       updateHead(branchName);
+        if (branchName.equals(getCurrentBranch())) {
+            System.err.println("No need to checkout the current branch.");
+            System.exit(0);
+        }
+        String branchId = getBranchId(branchName);
+        checkUntracked();
+        checkBranchValidity(branchId);
+
+        checkoutCommit(getCommit(branchId)); // getCommit always get a valid branchId cuz of checkBranchValidity
+        updateHead(branchName);
+        clearIndex();
     }
 
-   public static void checkoutCommit(String commitId) {
-       GitletCommitObj commitObj = getCommit(commitId);
-       GitletIndex snapshot = commitObj.getSnapshot();
+    public static void checkoutCommit(GitletCommitObj commitObj) {
 
-       for (String file: Utils.plainFilenamesIn(CWD)) {
-           Utils.restrictedDelete(join(CWD, file)); // delete cwd
-       }
 
-       for (Map.Entry<String, String> pair: snapshot.getIndexPair().entrySet()) {
-           File newFile = join(CWD, pair.getKey());
-          createFile(newFile);
-          Utils.writeContents(newFile, readContentsAsString(getObjectPath("blob", pair.getValue())));
-       }
-   }
+        assert commitObj != null;
+        GitletIndex snapshot = commitObj.getSnapshot();
+        Set<String> files = snapshot.getIndexPair().keySet();
+
+        for (String file : Utils.plainFilenamesIn(CWD)) {
+            if (!files.contains(file)) {
+                Utils.restrictedDelete(join(CWD, file)); // delete cwd
+            }
+        }
+
+        for (String file : snapshot.getIndexPair().keySet()) {
+            checkoutFile(commitObj, file); // restore files from the commit
+        }
+
+    }
+
+
+    public static void checkoutFile(GitletCommitObj commitObj, String file) {
+        GitletIndex snapshot = commitObj.getSnapshot();
+        if (!snapshot.hasEntry(file)) {
+            System.out.println("File does not exist in that commit.");
+            System.exit(0);
+        }
+        File newFile = join(CWD, file);
+
+        if (!newFile.exists()) {
+            createFile(newFile);
+        }
+        Utils.writeContents(newFile, readContentsAsString(getObjectPath("blob", snapshot.getIndexEntry(file))));
+    }
 }

@@ -96,12 +96,12 @@ public class GitletRepository {
     }
 
 
-     static boolean deleteFile(File file) {
+    static boolean deleteFile(File file) {
         if (file.exists()) {
             return file.delete();
         }
         return false;
-     }
+    }
 
     /**
      * creates the .gitlet directory
@@ -153,8 +153,10 @@ public class GitletRepository {
         GitletRepository.createRepository(); // initialize the .gitlet repo
         updateHead(getDefaultBranch()); // initializing head with default branch
 
+
         GitletCommitObj initialCommit = createCommitObject("initial commit",
-               getFormattedTime(new Date(0))); // creating the initial commit
+                getFormattedTime(new Date(0))); // creating the initial commit
+
         createBranch(getDefaultBranch(), createCommit(initialCommit)); // create the default branch and add the commit id
 
     }
@@ -162,9 +164,9 @@ public class GitletRepository {
     public static void showBranchStatus() {
         System.out.println("=== Branches ===");
         String curBranch = getCurrentBranch();
-        for (String branch: getBranches()) {
+        for (String branch : getBranches()) {
             if (curBranch.equals(branch)) {
-                System.out.println("*" + branch );
+                System.out.println("*" + branch);
             } else {
                 System.out.println(branch);
             }
@@ -174,12 +176,11 @@ public class GitletRepository {
 
     private static void printStatus(String header, Set<String> files) {
         System.out.println("===" + header + "===");
-        for (String file: files) {
-           System.out.println(file);
+        for (String file : files) {
+            System.out.println(file);
         }
         System.out.println();
     }
-
 
 
 }

@@ -10,30 +10,47 @@ import static gitlet.Utils.readContentsAsString;
 
 public class GitletObject {
 
-   private static final File OBJ_DIR = join(GITLET_DIR,"objects");
+    private static final File OBJ_DIR = join(GITLET_DIR, "objects");
 
     public static String hashFileObject(String file) {
-       File fileObj = join(CWD, file);
-       if (!fileObj.exists()) {
-          System.err.println("File does not exist.");
-          System.exit(0);
-       }
-       return hashObject(readContentsAsString(fileObj));
+        File fileObj = join(CWD, file);
+        if (!fileObj.exists()) {
+            System.err.println("File does not exist.");
+            System.exit(0);
+        }
+        return hashObject(readContentsAsString(fileObj));
     }
 
     public static String hashObject(Object... contents) {
-       return Utils.sha1(contents);
+        return Utils.sha1(contents);
     }
 
     public static File getObjDir(String type) {
         return join(OBJ_DIR, type);
     }
 
-    public static File getObjectPath(String type, String commitId) {
-       String objParent = commitId.substring(0, 2);
-       String objFile = commitId.substring(2);
-       return join(OBJ_DIR, type, objParent, objFile);
+    public static String getObjPathComplete(String type, String commitId) {
+        String objParent = commitId.substring(0, 2);
+        int commitIdLength = commitId.length();
+        String objFile = commitId.substring(2, commitIdLength);
+
+        File parent = join(OBJ_DIR, type, objParent);
+
+        for (String file : parent.list()) {
+            if (file.substring(0, commitIdLength - 2).equals(objFile)) {
+                return objParent + file;
+            }
+        }
+        return null;
+
     }
+
+    public static File getObjectPath(String type, String commitId) {
+        String objParent = commitId.substring(0, 2);
+        String objFile = commitId.substring(2);
+        return join(OBJ_DIR, type, objParent, objFile);
+    }
+
 
     public static File createObjectFile(String type, String commitId) {
         File targetDir = join(OBJ_DIR, type, commitId.substring(0, 2));
@@ -46,7 +63,7 @@ public class GitletObject {
                 GitletRepository.createFile(targetFile);
             }
         } catch (GitletException e) {
-           e.printStackTrace();
+            e.printStackTrace();
         }
         return targetFile;
     }
