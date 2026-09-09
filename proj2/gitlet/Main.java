@@ -6,6 +6,7 @@ import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.*;
 import static gitlet.GitletIndex.*;
 import static gitlet.GitletObject.getObjPathComplete;
+import static gitlet.GitletRepository.getRepoStatus;
 import static gitlet.GitletRepository.showBranchStatus;
 
 /**
@@ -46,10 +47,10 @@ public class Main {
                 // TODO: check if a user is in a gitlet ininitialized directory, otherwise exit
                 // TODO: handle the `add [filename]` command
                 // TODO: check not only argument count, but also appropriateness
-                stageFile(args[1]);
+                stageFile(getCurrentCommit(), args[1]);
                 break;
             case "rm":
-                removeFile(args[1]);
+                removeFile(getCurrentCommit(), args[1]);
                 break;
             case "branch":
                 if (args.length < 2) {
@@ -84,7 +85,7 @@ public class Main {
                 findCommit(args[1]);
                 break;
             case "status":
-                showBranchStatus();
+                getRepoStatus();
                 break;
             case "reset":
                 resetBranch(args[1]);
@@ -98,7 +99,7 @@ public class Main {
                 break;
             case "ls-files":
                 //listIndex();
-                System.out.println(getIndexInstance().INDEX);
+                System.out.println(getIndexInstance().getIndexPair());
                 break;
             case "show":
                 if (args.length < 2) {

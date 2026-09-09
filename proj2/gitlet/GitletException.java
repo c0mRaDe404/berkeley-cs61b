@@ -17,4 +17,6 @@ class GitletException extends RuntimeException {
         super(msg);
     }
 
+
+
 }

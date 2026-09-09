@@ -16,6 +16,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+import static gitlet.GitletRepository.CWD;
+
 
 /** Assorted utilities.
  *
@@ -248,5 +250,8 @@ class Utils {
                 "%ta %tb %td %tT %tY %tz",
                 date, date, date, date, date, date);
     }
+
+
+
 
 }

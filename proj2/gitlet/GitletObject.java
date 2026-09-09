@@ -1,8 +1,8 @@
 package gitlet;
 
 import java.io.File;
-import java.io.Serializable;
 
+import static gitlet.GitletErrorMsg.checkFileExists;
 import static gitlet.GitletRepository.CWD;
 import static gitlet.GitletRepository.GITLET_DIR;
 import static gitlet.Utils.join;
@@ -14,10 +14,7 @@ public class GitletObject {
 
     public static String hashFileObject(String file) {
         File fileObj = join(CWD, file);
-        if (!fileObj.exists()) {
-            System.err.println("File does not exist.");
-            System.exit(0);
-        }
+        //checkFileExists(file);
         return hashObject(readContentsAsString(fileObj));
     }
 

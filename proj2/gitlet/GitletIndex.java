@@ -7,7 +7,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import static gitlet.GitletCommit.getCurrentCommit;
+import static gitlet.GitletErrorMsg.checkFileExists;
+import static gitlet.GitletErrorMsg.checkFileIsTracked;
 import static gitlet.GitletObject.createObjectFile;
 import static gitlet.GitletObject.hashFileObject;
 import static gitlet.GitletRepository.*;
@@ -16,7 +17,7 @@ import static gitlet.Utils.join;
 
 public class GitletIndex implements Serializable {
 
-    HashMap<String, String> INDEX;
+    private HashMap<String, String> INDEX;
 
 
     private GitletIndex() {
@@ -32,71 +33,6 @@ public class GitletIndex implements Serializable {
     }
 
 
-    public boolean isTracked(String file) {
-        return hasEntry(file) || getCurrentCommit().getSnapshot().hasEntry(file);
-    }
-
-
-    public boolean isRemoved(String file) {
-        // deleted after the recent commit (unstaged deletion)
-        // removed after staging (unstaged deletion)
-        boolean fileExists = join(CWD, file).exists();
-        return (getCurrentCommit().getSnapshot().hasEntry(file) && !fileExists) ||
-                (getIndexInstance().hasEntry(file) && !fileExists);
-    }
-
-    public boolean isModified(String file) {
-        // changed since the recent commit (unstaged modification)
-        // changed after staging (unstaged modification)
-
-        GitletCommitObj currentCommit = getCurrentCommit();
-        GitletIndex currentIndex = getIndexInstance();
-
-        String fileIdCommit = currentCommit.getSnapshot().getIndexEntry(file);
-        String fileIdIndex = currentIndex.getIndexEntry(file);
-        String fileIdWorkingTree = hashFileObject(file);
-
-        return !fileIdWorkingTree.equals(fileIdCommit) || !fileIdWorkingTree.equals(fileIdIndex);
-    }
-
-
-    public boolean hasEntry(String file) {
-        return INDEX.containsKey(file);
-    }
-
-    public static void stageFile(String file) {
-        GitletIndex index = getIndexInstance();
-        if (!index.isModified(file)) {
-            if (index.hasEntry(file)) {
-                index.removeFromIndex(file);
-            }
-        } else {
-            index.addToIndex(file);
-        }
-
-    }
-
-    public static void removeFile(String file) {
-
-        GitletIndex index = getIndexInstance();
-
-        if (index.isTracked(file)) { // if a file is tracked
-            if (index.hasEntry(file)) { // if it's in index
-                index.removeFromIndex(file);
-            }
-
-            if (getCurrentCommit().getSnapshot().hasEntry(file)) { // if it's in the current commit
-                index.updateIndex(file, null);
-                File targetFile = join(CWD, file);
-                deleteFile(targetFile);
-            }
-        } else {
-            System.err.println("No reason to remove the file.");
-            System.exit(0);
-        }
-
-    }
-
     public static GitletIndex getIndexInstance() {
         GitletIndex index = new GitletIndex();
         index.readFromIndex();
@@ -108,10 +44,92 @@ public class GitletIndex implements Serializable {
     }
 
 
-    public static void listIndex() {
-        GitletIndex index = new GitletIndex();
-        index.listFilesFromIndex();
+
+    public boolean isTracked(GitletCommitObj currentCommit, String file) {
+        return hasEntry(file) || currentCommit.getSnapshot().hasEntry(file);
     }
+
+
+
+    public boolean isRemoved(GitletCommitObj currentCommit, String file) {
+        // deleted after the recent commit (unstaged deletion)
+        // removed after staging (unstaged deletion)
+
+
+        boolean fileExists = join(CWD, file).exists();
+        return (currentCommit.getSnapshot().hasEntry(file) && !fileExists) ||
+                (getIndexInstance().hasEntry(file) && !fileExists);
+    }
+
+    public boolean isModified(GitletCommitObj currentCommit, String file) {
+        // changed since the recent commit (unstaged modification)
+        // changed after staging (unstaged modification)
+
+        checkFileExists(file);
+        checkFileIsTracked(this, file);
+
+
+        GitletIndex currentIndex = getIndexInstance();
+
+        String fileIdCommit = currentCommit.getSnapshot().getIndexEntry(file); // version from the commit
+        String fileIdIndex = currentIndex.getIndexEntry(file); // version from the index
+        String fileIdWorkingTree = hashFileObject(file); // version from the working tree
+
+
+
+        if (fileIdCommit == null) {
+           return !fileIdWorkingTree.equals(fileIdIndex);
+        } else {
+            return !fileIdWorkingTree.equals(fileIdCommit);
+        }
+    }
+
+
+    public boolean hasEntry(String file) {
+        return INDEX.containsKey(file);
+    }
+
+    public static void stageFile(GitletCommitObj currentCommit, String file) {
+        //checkFileExists(file);
+        GitletIndex index = getIndexInstance();
+
+        if (index.isTracked(currentCommit, file)) { // if it's tracked
+            if (index.isRemoved(currentCommit, file)) {
+              removeFile(currentCommit, file);
+            }
+            if (index.isModified(currentCommit, file)) { // and also modified
+                index.addToIndex(file); // then add it
+            } else if (index.hasEntry(file)) { // not modified? but already staged?
+                index.removeFromIndex(file);  // remove it since the file is intact
+            }
+        } else {
+            index.addToIndex(file); // untracked, then add it.
+        }
+
+    }
+
+    public static void removeFile(GitletCommitObj currentCommit, String file) {
+
+        GitletIndex index = getIndexInstance();
+        if (index.isTracked(currentCommit, file)) { // if a file is tracked
+            if (index.hasEntry(file)) { // if it's in index
+                index.removeFromIndex(file);
+            }
+
+            if (currentCommit.getSnapshot().hasEntry(file)) { // if it's in the current commit
+                index.updateIndex(file, null);
+                File targetFile = join(CWD, file);
+                deleteFile(targetFile);
+            }
+        } else {
+            System.err.println("No reason to remove the file.");
+            System.exit(0);
+        }
+
+    }
+
+
+
 
     public static void clearIndex() {
         GitletIndex index = new GitletIndex();
@@ -139,12 +157,8 @@ public class GitletIndex implements Serializable {
      *
      * @param file
      */
-    public void addToIndex(String file) {
+    private void addToIndex(String file) {
         File sourceFile = join(CWD, file);
-        if (!sourceFile.exists()) {
-            System.err.println("File does not exist.");
-            System.exit(0);
-        }
         String hash = hashFileObject(file);
         File targetFile = createObjectFile("blob", hash);
         Utils.writeContents(targetFile, Utils.readContentsAsString(sourceFile));
@@ -190,16 +204,6 @@ public class GitletIndex implements Serializable {
         writeToIndex();
     }
 
-    /**
-     * list contents in the index file (for debugging purposes)
-     *
-     */
-    private void listFilesFromIndex() {
-        readFromIndex();
-        for (Object file : INDEX.keySet()) {
-            System.out.println(file);
-        }
-    }
 
 
     /**
@@ -226,11 +230,12 @@ public class GitletIndex implements Serializable {
      *
      * @return true if staging area is not empty otherwise false
      */
-    boolean hasStagedFiles() {
+    public boolean hasStagedFiles() {
         return !INDEX.isEmpty();
     }
 
-    HashMap<String, String> getIndexPair() {
-        return INDEX;
+
+    public HashMap<String, String> getIndexPair() {
+        return (HashMap<String, String>) INDEX.clone();
     }
 }

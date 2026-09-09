@@ -1,11 +1,7 @@
 package gitlet;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static gitlet.GitletBranch.*;
@@ -27,11 +23,10 @@ class GitletCommitObj extends GitletObject implements Serializable {
     private List<String> parents; // parents of the commit
     private GitletIndex snapshot; // copy of the index file
 
-    private GitletCommitObj(String message, String time, GitletIndex index) {
+    private GitletCommitObj(String message, String time, GitletIndex snapshot) {
         this.message = message;
         this.time = time;
-        //get commit snapshot
-        this.snapshot = GitletCommit.getCommitSnapshot(index);
+        this.snapshot = snapshot;
         this.parents = new ArrayList<>();
     }
 
@@ -44,11 +39,11 @@ class GitletCommitObj extends GitletObject implements Serializable {
      */
 
     public static GitletCommitObj createCommitObject(String msg, String time) {
-        return new GitletCommitObj(msg, time, getIndexInstance());
+        return new GitletCommitObj(msg, time, GitletCommit.getCommitSnapshot(getIndexInstance()));
     }
 
     public static GitletCommitObj createCommitObject(String msg, String time, GitletIndex index) {
-        return new GitletCommitObj(msg, time, index);
+        return new GitletCommitObj(msg, time, GitletCommit.getCommitSnapshot(index));
     }
 
     /**

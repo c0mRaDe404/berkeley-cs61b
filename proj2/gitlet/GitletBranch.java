@@ -2,11 +2,11 @@ package gitlet;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 import static gitlet.GitletCommit.getCommit;
+import static gitlet.GitletCommit.getCurrentCommit;
 import static gitlet.GitletIndex.clearIndex;
 import static gitlet.GitletObject.getObjPathComplete;
 import static gitlet.GitletObject.getObjectPath;
@@ -21,14 +21,7 @@ public class GitletBranch {
     private static String currentBranch = getDefaultBranch();
     private static File REF_DIR = join(GITLET_DIR, "refs", "heads");
 
-    /**
-     * gives the HEAD file
-     *
-     * @return headFile pointer
-     */
-    public static File getHead() {
-        return HEAD;
-    }
+
 
     public static List<String> getBranches() {
         return Utils.plainFilenamesIn(REF_DIR);
@@ -63,7 +56,7 @@ public class GitletBranch {
      * @param ref
      */
     public static void updateHead(String ref) {
-        Utils.writeContents(HEAD, "refs/heads/" + ref);
+        Utils.writeContents(HEAD, ref);
     }
 
 
@@ -75,6 +68,10 @@ public class GitletBranch {
      */
     public static void createBranch(String branchName, String commitId) {
         File branch = getBranchFile(branchName);
+        if (branch.exists()) {
+            System.err.println("A branch with that name already exists.");
+            System.exit(0);
+        }
         createFile(branch);
         Utils.writeContents(branch, commitId);
     }
@@ -155,7 +152,7 @@ public class GitletBranch {
     private static boolean untrackedExists() {
         GitletIndex index = GitletIndex.getIndexInstance();
         for (String file : Utils.plainFilenamesIn(CWD)) {
-            if (!index.isTracked(file)) {
+            if (!index.isTracked(getCurrentCommit(), file)) {
                 return true;
             }
         }
