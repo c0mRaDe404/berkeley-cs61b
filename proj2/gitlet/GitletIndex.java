@@ -7,8 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import static gitlet.GitletErrorMsg.checkFileExists;
-import static gitlet.GitletErrorMsg.checkFileIsTracked;
+import static gitlet.GitletErrorMsg.*;
 import static gitlet.GitletObject.createObjectFile;
 import static gitlet.GitletObject.hashFileObject;
 import static gitlet.GitletRepository.*;
@@ -76,11 +75,12 @@ public class GitletIndex implements Serializable {
         String fileIdWorkingTree = hashFileObject(file); // version from the working tree
 
 
-
         if (fileIdCommit == null) {
            return !fileIdWorkingTree.equals(fileIdIndex);
-        } else {
+        } else if (fileIdIndex == null){
             return !fileIdWorkingTree.equals(fileIdCommit);
+        } else {
+            return !(fileIdWorkingTree.equals(fileIdIndex) || fileIdWorkingTree.equals(fileIdCommit));
         }
     }
 
@@ -91,13 +91,13 @@ public class GitletIndex implements Serializable {
 
     public static void stageFile(GitletCommitObj currentCommit, String file) {
         //checkFileExists(file);
+        checkRepoExists();
         GitletIndex index = getIndexInstance();
 
         if (index.isTracked(currentCommit, file)) { // if it's tracked
             if (index.isRemoved(currentCommit, file)) {
               removeFile(currentCommit, file);
-            }
-            if (index.isModified(currentCommit, file)) { // and also modified
+            } else if (index.isModified(currentCommit, file)) { // and also modified
                 index.addToIndex(file); // then add it
             } else if (index.hasEntry(file)) { // not modified? but already staged?
                 index.removeFromIndex(file);  // remove it since the file is intact
@@ -110,6 +110,7 @@ public class GitletIndex implements Serializable {
 
     public static void removeFile(GitletCommitObj currentCommit, String file) {
 
+        checkRepoExists();
         GitletIndex index = getIndexInstance();
         if (index.isTracked(currentCommit, file)) { // if a file is tracked
             if (index.hasEntry(file)) { // if it's in index

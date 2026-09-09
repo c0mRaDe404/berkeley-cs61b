@@ -16,6 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+import static gitlet.GitletObject.getHashAlgo;
 import static gitlet.GitletRepository.CWD;
 
 
@@ -35,9 +36,9 @@ class Utils {
 
     /** Returns the SHA-1 hash of the concatenation of VALS, which may
      *  be any mixture of byte arrays and Strings. */
-    static String sha1(Object... vals) {
+    static String sha(Object... vals) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            MessageDigest md = MessageDigest.getInstance(getHashAlgo());
             for (Object val : vals) {
                 if (val instanceof byte[]) {
                     md.update((byte[]) val);
@@ -59,8 +60,8 @@ class Utils {
 
     /** Returns the SHA-1 hash of the concatenation of the strings in
      *  VALS. */
-    static String sha1(List<Object> vals) {
-        return sha1(vals.toArray(new Object[vals.size()]));
+    static String sha(List<Object> vals) {
+        return sha(vals.toArray(new Object[vals.size()]));
     }
 
     /* FILE DELETION */

@@ -254,6 +254,7 @@ public class GitletRepository {
     }
 
     public static void getRepoStatus() {
+
         showBranchStatus();
         showIndexStatus();
         showSnapshotStatus();

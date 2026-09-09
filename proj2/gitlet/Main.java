@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.*;
+import static gitlet.GitletErrorMsg.checkRepoExists;
 import static gitlet.GitletIndex.*;
 import static gitlet.GitletObject.getObjPathComplete;
 import static gitlet.GitletRepository.getRepoStatus;
@@ -31,7 +32,7 @@ public class Main {
      * Usage: java gitlet.Main ARGS, where ARGS contains
      * <COMMAND> <OPERAND1> <OPERAND2> ...
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         // TODO: what if args is empty?
         if (args.length < 1) {
             printError("Please enter a command.");
@@ -47,12 +48,16 @@ public class Main {
                 // TODO: check if a user is in a gitlet ininitialized directory, otherwise exit
                 // TODO: handle the `add [filename]` command
                 // TODO: check not only argument count, but also appropriateness
+
+                checkRepoExists();
                 stageFile(getCurrentCommit(), args[1]);
                 break;
             case "rm":
+                checkRepoExists();
                 removeFile(getCurrentCommit(), args[1]);
                 break;
             case "branch":
+                checkRepoExists();
                 if (args.length < 2) {
                     listBranches();
                     System.exit(0);
@@ -60,9 +65,12 @@ public class Main {
                 createBranch(args[1]);
                 break;
             case "rm-branch":
+
+                checkRepoExists();
                 removeBranch(args[1]);
                 break;
             case "checkout":
+                checkRepoExists();
                 if (args.length == 2) {
                     checkoutBranch(args[1]);
                 } else if (args.length == 3) {
@@ -70,27 +78,39 @@ public class Main {
                     checkoutFile(getCurrentCommit(), args[2]);
                 } else if (args.length == 4) {
                     assert args[2].equals("--");
-                    checkoutFile(getCommit(args[1]), args[3]);
+                    checkoutFile(getCommit(getObjPathComplete("commit", args[1])), args[3]);
                 } else {
                     System.err.println("Not supported.");
                 }
                 break;
             case "log":
+
+                checkRepoExists();
                 printLog(getBranchId(getCurrentBranch()));
                 break;
             case "global-log":
+
+                checkRepoExists();
                 printGlobalLog();
                 break;
             case "find":
+
+                checkRepoExists();
                 findCommit(args[1]);
                 break;
             case "status":
+
+                checkRepoExists();
                 getRepoStatus();
                 break;
             case "reset":
+
+                checkRepoExists();
                 resetBranch(args[1]);
                 break;
             case "commit":
+
+                checkRepoExists();
                 if (args.length < 2) {
                     System.out.println("Please enter a commit message.");
                     System.exit(0);
@@ -98,10 +118,14 @@ public class Main {
                 makeCommit(args[1]);
                 break;
             case "ls-files":
+
+                checkRepoExists();
                 //listIndex();
                 System.out.println(getIndexInstance().getIndexPair());
                 break;
             case "show":
+
+                checkRepoExists();
                 if (args.length < 2) {
                     showLatestCommit();
                 } else {
@@ -110,6 +134,7 @@ public class Main {
                 }
                 break;
             case "hash-object":
+                checkRepoExists();
                 System.out.println(GitletObject.hashFileObject(args[1]));
                 break;
             default:

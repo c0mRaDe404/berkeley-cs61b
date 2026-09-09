@@ -7,6 +7,7 @@ import java.util.Set;
 
 import static gitlet.GitletCommit.getCommit;
 import static gitlet.GitletCommit.getCurrentCommit;
+import static gitlet.GitletErrorMsg.checkRepoExists;
 import static gitlet.GitletIndex.clearIndex;
 import static gitlet.GitletObject.getObjPathComplete;
 import static gitlet.GitletObject.getObjectPath;
@@ -83,6 +84,7 @@ public class GitletBranch {
 
     public static void listBranches() {
         // what if ../refs/heads got deleted?
+
         for (File file : Objects.requireNonNull(REF_DIR.listFiles())) {
             if (file.isFile()) {
                 if (file.getName().equals(getCurrentBranch())) {

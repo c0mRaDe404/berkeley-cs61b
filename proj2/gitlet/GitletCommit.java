@@ -85,7 +85,7 @@ public class GitletCommit {
      */
     public static String createCommit(GitletCommitObj commitObj) {
         String commitHash;
-        commitHash = Utils.sha1(commitObj.getMsg(), commitObj.getTimestamp(),
+        commitHash = Utils.sha(commitObj.getMsg(), commitObj.getTimestamp(),
                 commitObj.getSnapshot().indexToString(commitObj));
         createCommit(commitHash, commitObj);
         return commitHash;

@@ -8,6 +8,12 @@ import static gitlet.Utils.join;
 
 public class GitletErrorMsg {
 
+    public static void checkRepoExists() {
+        if (!join(CWD, ".gitlet").exists()) {
+            System.err.println("Not in an initialized Gitlet directory.");
+            System.exit(0);
+        }
+    }
 
     public static void checkFileIsTracked(GitletIndex index, String file) {
         if (!index.isTracked(getCurrentCommit(), file)) {
