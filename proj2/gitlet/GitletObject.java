@@ -16,7 +16,8 @@ public class GitletObject {
     private static final int DIGEST_LENGTH = getDigestLength();
 
     public static String hashFileObject(String file) {
-        File fileObj = join(CWD, file);
+        File fileObj;
+        fileObj = join(CWD, file);
         //checkFileExists(file);
         return hashObject(readContentsAsString(fileObj));
     }
@@ -46,31 +47,41 @@ public class GitletObject {
             return commitId;
         }
 
-        String objParent = commitId.substring(0, 2);
-        int commitIdLength = commitId.length();
-        String objFile = commitId.substring(2, commitIdLength);
+        String objParent, objFile;
+        int commitIdLength;
+
+        objParent = commitId.substring(0, 2);
+        commitIdLength = commitId.length();
+        objFile = commitId.substring(2, commitIdLength);
 
         File parent = join(OBJ_DIR, type, objParent);
 
-        for (String file : parent.list()) {
-            if (file.substring(0, commitIdLength - 2).equals(objFile)) {
-                return objParent + file;
+        if (parent.exists()) {
+            for (String file : parent.list()) {
+                if (file.substring(0, commitIdLength - 2).equals(objFile)) {
+                    return objParent + file;
+                }
             }
         }
+
         return null;
 
     }
 
     public static File getObjectPath(String type, String commitId) {
-        String objParent = commitId.substring(0, 2);
-        String objFile = commitId.substring(2);
+        String objParent, objFile;
+        objParent = commitId.substring(0, 2);
+        objFile = commitId.substring(2);
         return join(OBJ_DIR, type, objParent, objFile);
     }
 
 
     public static File createObjectFile(String type, String commitId) {
-        File targetDir = join(OBJ_DIR, type, commitId.substring(0, 2));
-        File targetFile = join(targetDir, commitId.substring(2));
+        File targetDir, targetFile;
+
+        targetDir = join(OBJ_DIR, type, commitId.substring(0, 2));
+        targetFile = join(targetDir, commitId.substring(2));
+
         try {
             if (!targetDir.exists()) {
                 GitletRepository.createDirectory(targetDir);

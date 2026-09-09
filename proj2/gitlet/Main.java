@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.*;
+import static gitlet.GitletErrorMsg.checkFileExists;
 import static gitlet.GitletErrorMsg.checkRepoExists;
 import static gitlet.GitletIndex.*;
 import static gitlet.GitletObject.getObjPathComplete;
@@ -50,6 +51,7 @@ public class Main {
                 // check not only argument count, but also appropriateness
 
                 checkRepoExists();
+                checkFileExists(args[1]);
                 stageFile(getCurrentCommit(), args[1]);
                 break;
             case "rm":
@@ -65,7 +67,6 @@ public class Main {
                 createBranch(args[1]);
                 break;
             case "rm-branch":
-
                 checkRepoExists();
                 removeBranch(args[1]);
                 break;
@@ -111,7 +112,7 @@ public class Main {
             case "commit":
 
                 checkRepoExists();
-                if (args.length < 2) {
+                if (args.length < 2 || args[1].isEmpty()) {
                     System.out.println("Please enter a commit message.");
                     System.exit(0);
                 }

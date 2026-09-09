@@ -7,6 +7,7 @@ import java.util.Set;
 
 import static gitlet.GitletCommit.getCommit;
 import static gitlet.GitletCommit.getCurrentCommit;
+import static gitlet.GitletErrorMsg.*;
 import static gitlet.GitletIndex.clearIndex;
 import static gitlet.GitletObject.getObjPathComplete;
 import static gitlet.GitletObject.getObjectPath;
@@ -150,7 +151,7 @@ public class GitletBranch {
     }
 
 
-    private static boolean untrackedExists() {
+    public static boolean untrackedExists() {
         GitletIndex index = GitletIndex.getIndexInstance();
         for (String file : Utils.plainFilenamesIn(CWD)) {
             if (!index.isTracked(getCurrentCommit(), file)) {
@@ -160,30 +161,15 @@ public class GitletBranch {
         return false;
     }
 
-    public static void checkUntracked() {
-        if (untrackedExists()) {
-            System.err.println("There is an untracked file in the way; " +
-                    "delete it, or add and commit it first.");
-            System.exit(0);
-        }
-    }
 
-    public static void checkBranchValidity(String branchId) {
-        if (branchId == null) {
-            System.err.println("No such branch exists.");
-            System.exit(0);
-        }
-    }
 
 
     public static void resetBranch(String commitId) {
         checkUntracked();
         commitId = getObjPathComplete("commit", commitId);
 
-        if (commitId == null) {
-            System.err.println("No commit with that id exists.");
-            System.exit(0);
-        }
+        checkCommitExists(commitId);
+
 
         GitletCommitObj commitObj = getCommit(commitId);
         checkoutCommit(commitObj);
@@ -192,16 +178,16 @@ public class GitletBranch {
     }
 
     public static void checkoutBranch(String branchName) {
-        if (branchName.equals(getCurrentBranch())) {
-            System.err.println("No need to checkout the current branch.");
-            System.exit(0);
-        }
-        String branchId = getBranchId(branchName);
+
+        String branchId;
+        checkCurrentBranchCheckout(branchName);
         checkUntracked();
+        branchId = getBranchId(branchName);
         checkBranchValidity(branchId);
+
         /**
-            getCommit always get a valid branchId
-            cuz of checkBranchValidity
+         getCommit always get a valid branchId
+         cuz of checkBranchValidity
          **/
         checkoutCommit(getCommit(branchId));
         updateHead(branchName);
@@ -210,8 +196,8 @@ public class GitletBranch {
 
     public static void checkoutCommit(GitletCommitObj commitObj) {
 
+        checkCommitValidity(commitObj);
 
-        assert commitObj != null;
         GitletIndex snapshot = commitObj.getSnapshot();
         Set<String> files = snapshot.getIndexPair().keySet();
 
@@ -230,15 +216,14 @@ public class GitletBranch {
 
     public static void checkoutFile(GitletCommitObj commitObj, String file) {
         GitletIndex snapshot = commitObj.getSnapshot();
-        if (!snapshot.hasEntry(file)) {
-            System.out.println("File does not exist in that commit.");
-            System.exit(0);
-        }
+        checkFileExistsInCommit(snapshot, file);
+
         File newFile = join(CWD, file);
 
         if (!newFile.exists()) {
             createFile(newFile);
         }
+
         Utils.writeContents(newFile, readContentsAsString(getObjectPath("blob", snapshot.getIndexEntry(file))));
     }
 }
