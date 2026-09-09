@@ -1,15 +1,11 @@
 package gitlet;
 
-import java.io.IOException;
-
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.*;
-import static gitlet.GitletErrorMsg.checkFileExists;
-import static gitlet.GitletErrorMsg.checkRepoExists;
+import static gitlet.GitletErrorMsg.*;
 import static gitlet.GitletIndex.*;
 import static gitlet.GitletObject.getObjPathComplete;
-import static gitlet.GitletRepository.getRepoStatus;
-import static gitlet.GitletRepository.showBranchStatus;
+import static gitlet.GitletStatus.getRepoStatus;
 
 /**
  * Driver class for Gitlet, a subset of the Git version-control system.
@@ -50,16 +46,16 @@ public class Main {
                 // handle the `add [filename]` command
                 // check not only argument count, but also appropriateness
 
-                checkRepoExists();
+                checkRepoNotExists();
                 checkFileExists(args[1]);
                 stageFile(getCurrentCommit(), args[1]);
                 break;
             case "rm":
-                checkRepoExists();
+                checkRepoNotExists();
                 removeFile(getCurrentCommit(), args[1]);
                 break;
             case "branch":
-                checkRepoExists();
+                checkRepoNotExists();
                 if (args.length < 2) {
                     listBranches();
                     System.exit(0);
@@ -67,51 +63,53 @@ public class Main {
                 createBranch(args[1]);
                 break;
             case "rm-branch":
-                checkRepoExists();
+                checkRepoNotExists();
                 removeBranch(args[1]);
                 break;
             case "checkout":
-                checkRepoExists();
+                checkRepoNotExists();
                 if (args.length == 2) {
                     checkoutBranch(args[1]);
                 } else if (args.length == 3) {
-                    assert args[1].equals("--");
+                    checkOperands(args[1], "--");
                     checkoutFile(getCurrentCommit(), args[2]);
                 } else if (args.length == 4) {
-                    assert args[2].equals("--");
-                    checkoutFile(getCommit(getObjPathComplete("commit", args[1])), args[3]);
+                    checkOperands(args[2], "--");
+                    String objPath = getObjPathComplete("commit", args[1]);
+                    checkCommitExists(objPath);
+                    checkoutFile(getCommit(objPath), args[3]);
                 } else {
                     System.err.println("Not supported.");
                 }
                 break;
             case "log":
 
-                checkRepoExists();
+                checkRepoNotExists();
                 printLog(getBranchId(getCurrentBranch()));
                 break;
             case "global-log":
 
-                checkRepoExists();
+                checkRepoNotExists();
                 printGlobalLog();
                 break;
             case "find":
 
-                checkRepoExists();
+                checkRepoNotExists();
                 findCommit(args[1]);
                 break;
             case "status":
 
-                checkRepoExists();
+                checkRepoNotExists();
                 getRepoStatus();
                 break;
             case "reset":
 
-                checkRepoExists();
+                checkRepoNotExists();
                 resetBranch(args[1]);
                 break;
             case "commit":
 
-                checkRepoExists();
+                checkRepoNotExists();
                 if (args.length < 2 || args[1].isEmpty()) {
                     System.out.println("Please enter a commit message.");
                     System.exit(0);
@@ -120,13 +118,13 @@ public class Main {
                 break;
             case "ls-files":
 
-                checkRepoExists();
+                checkRepoNotExists();
                 //listIndex();
                 System.out.println(getIndexInstance().getIndexPair());
                 break;
             case "show":
 
-                checkRepoExists();
+                checkRepoNotExists();
                 if (args.length < 2) {
                     showLatestCommit();
                 } else {
@@ -135,7 +133,7 @@ public class Main {
                 }
                 break;
             case "hash-object":
-                checkRepoExists();
+                checkRepoNotExists();
                 System.out.println(GitletObject.hashFileObject(args[1]));
                 break;
             default:

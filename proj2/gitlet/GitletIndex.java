@@ -43,11 +43,9 @@ public class GitletIndex implements Serializable {
     }
 
 
-
     public boolean isTracked(GitletCommitObj currentCommit, String file) {
         return hasEntry(file) || currentCommit.getSnapshot().hasEntry(file);
     }
-
 
 
     public boolean isRemoved(GitletCommitObj currentCommit, String file) {
@@ -78,7 +76,7 @@ public class GitletIndex implements Serializable {
 
 
         if (fileIdCommit == null) {
-           return !fileIdWorkingTree.equals(fileIdIndex);
+            return !fileIdWorkingTree.equals(fileIdIndex);
         } else if (fileIdIndex == null) {
             return !fileIdWorkingTree.equals(fileIdCommit);
         } else {
@@ -94,7 +92,7 @@ public class GitletIndex implements Serializable {
 
     public static void stageFile(GitletCommitObj currentCommit, String file) {
         //checkFileExists(file);
-        checkRepoExists();
+        checkRepoNotExists();
         GitletIndex index = getIndexInstance();
 
         if (index.isTracked(currentCommit, file)) { // if it's tracked
@@ -113,7 +111,7 @@ public class GitletIndex implements Serializable {
 
     public static void removeFile(GitletCommitObj currentCommit, String file) {
 
-        checkRepoExists();
+        checkRepoNotExists();
         GitletIndex index = getIndexInstance();
         if (index.isTracked(currentCommit, file)) { // if a file is tracked
             if (index.hasEntry(file)) { // if it's in index
@@ -131,8 +129,6 @@ public class GitletIndex implements Serializable {
         }
 
     }
-
-
 
 
     public static void clearIndex() {
@@ -207,7 +203,6 @@ public class GitletIndex implements Serializable {
         INDEX.remove(file);
         writeToIndex();
     }
-
 
 
     /**

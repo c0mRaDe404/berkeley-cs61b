@@ -170,6 +170,9 @@ public class GitletCommit {
      * @return a commit object
      */
     public static GitletCommitObj getCommit(String commitId) {
+        /* it doesn't error when the given
+          commit is invalid
+         */
         if (commitId == null) {
             return null;
         }

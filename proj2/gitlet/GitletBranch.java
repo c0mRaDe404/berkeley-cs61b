@@ -224,6 +224,8 @@ public class GitletBranch {
             createFile(newFile);
         }
 
-        Utils.writeContents(newFile, readContentsAsString(getObjectPath("blob", snapshot.getIndexEntry(file))));
+        File objPath =  getObjectPath("blob", snapshot.getIndexEntry(file));
+        String contents = readContentsAsString(objPath);
+        Utils.writeContents(newFile, contents);
     }
 }

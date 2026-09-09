@@ -6,17 +6,32 @@ import static gitlet.GitletBranch.getCurrentBranch;
 import static gitlet.GitletBranch.untrackedExists;
 import static gitlet.GitletCommit.getCurrentCommit;
 import static gitlet.GitletRepository.CWD;
+import static gitlet.GitletRepository.repoExists;
 import static gitlet.Utils.join;
 
 public class GitletErrorMsg {
 
     public static void checkRepoExists() {
-        if (!join(CWD, ".gitlet").exists()) {
+        if (repoExists()) {
+            System.err.println("A Gitlet version-control system "
+                    + "already exists in the current directory.");
+            System.exit(0);
+        }
+    }
+
+    public static void checkRepoNotExists() {
+        if (!repoExists()) {
             System.err.println("Not in an initialized Gitlet directory.");
             System.exit(0);
         }
     }
 
+    public static void checkOperands(String given, String target) {
+        if (!given.equals(target)) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        }
+    }
     public static void checkCurrentBranchCheckout(String branchName) {
         if (branchName.equals(getCurrentBranch())) {
             System.err.println("No need to checkout the current branch.");
@@ -26,8 +41,8 @@ public class GitletErrorMsg {
 
     public static void checkUntracked() {
         if (untrackedExists()) {
-            System.err.println("There is an untracked file in the way; " +
-                    "delete it, or add and commit it first.");
+            System.err.println("There is an untracked file in the way; "
+                    + "delete it, or add and commit it first.");
             System.exit(0);
         }
     }
@@ -45,6 +60,7 @@ public class GitletErrorMsg {
             System.exit(0);
         }
     }
+
     public static void checkCommitExists(String commitId) {
         if (commitId == null) {
             System.err.println("No commit with that id exists.");
@@ -58,14 +74,16 @@ public class GitletErrorMsg {
             System.exit(0);
         }
     }
+
     public static void checkCommitValidity(GitletCommitObj commit) {
-       if (commit == null) {
-           System.err.println("No commit with that id exists.");
-           System.exit(0);
-       }
+        if (commit == null) {
+            System.err.println("No commit with that id exists.");
+            System.exit(0);
+        }
     }
 
-    /** Checks if the given file exists
+    /**
+     * Checks if the given file exists
      *
      * @param file
      */
@@ -76,7 +94,8 @@ public class GitletErrorMsg {
         }
     }
 
-    /** Checks if the given file exists
+    /**
+     * Checks if the given file exists
      *
      * @param file
      */
