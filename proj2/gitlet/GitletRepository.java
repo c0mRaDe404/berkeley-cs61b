@@ -8,7 +8,6 @@ import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.*;
 import static gitlet.GitletCommitObj.createCommitObject;
 import static gitlet.GitletErrorMsg.checkRepoExists;
-import static gitlet.GitletIndex.getIndexInstance;
 import static gitlet.Utils.*;
 
 
@@ -55,9 +54,7 @@ public class GitletRepository {
             join(GITLET_DIR, "refs", "tags")
     }; // order should be preserved
 
-    private static final File[] FILES = {
-            HEAD
-    }; // order doesnt matter
+    private static final File[] FILES = { HEAD }; // order doesnt matter
 
     public static boolean repoExists() {
         return GITLET_DIR.exists();

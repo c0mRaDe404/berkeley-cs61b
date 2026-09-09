@@ -92,7 +92,7 @@ public class GitletIndex implements Serializable {
 
     public static void stageFile(GitletCommitObj currentCommit, String file) {
         //checkFileExists(file);
-        checkRepoNotExists();
+        checkRepoDoesNotExist();
         GitletIndex index = getIndexInstance();
 
         if (index.isTracked(currentCommit, file)) { // if it's tracked
@@ -111,7 +111,7 @@ public class GitletIndex implements Serializable {
 
     public static void removeFile(GitletCommitObj currentCommit, String file) {
 
-        checkRepoNotExists();
+        checkRepoDoesNotExist();
         GitletIndex index = getIndexInstance();
         if (index.isTracked(currentCommit, file)) { // if a file is tracked
             if (index.hasEntry(file)) { // if it's in index

@@ -19,7 +19,7 @@ public class GitletErrorMsg {
         }
     }
 
-    public static void checkRepoNotExists() {
+    public static void checkRepoDoesNotExist() {
         if (!repoExists()) {
             System.err.println("Not in an initialized Gitlet directory.");
             System.exit(0);
@@ -28,10 +28,11 @@ public class GitletErrorMsg {
 
     public static void checkOperands(String given, String target) {
         if (!given.equals(target)) {
-            System.out.println("Incorrect operands.");
+            System.err.println("Incorrect operands.");
             System.exit(0);
         }
     }
+
     public static void checkCurrentBranchCheckout(String branchName) {
         if (branchName.equals(getCurrentBranch())) {
             System.err.println("No need to checkout the current branch.");
@@ -89,18 +90,6 @@ public class GitletErrorMsg {
      */
     public static void checkFileExists(String file) {
         if (!join(CWD, file).exists()) {
-            System.err.println("File does not exist.");
-            System.exit(0);
-        }
-    }
-
-    /**
-     * Checks if the given file exists
-     *
-     * @param file
-     */
-    public static void checkFileExists(File file) {
-        if (!file.exists()) {
             System.err.println("File does not exist.");
             System.exit(0);
         }

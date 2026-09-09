@@ -46,16 +46,16 @@ public class Main {
                 // handle the `add [filename]` command
                 // check not only argument count, but also appropriateness
 
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 checkFileExists(args[1]);
                 stageFile(getCurrentCommit(), args[1]);
                 break;
             case "rm":
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 removeFile(getCurrentCommit(), args[1]);
                 break;
             case "branch":
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 if (args.length < 2) {
                     listBranches();
                     System.exit(0);
@@ -63,11 +63,11 @@ public class Main {
                 createBranch(args[1]);
                 break;
             case "rm-branch":
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 removeBranch(args[1]);
                 break;
             case "checkout":
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 if (args.length == 2) {
                     checkoutBranch(args[1]);
                 } else if (args.length == 3) {
@@ -84,32 +84,32 @@ public class Main {
                 break;
             case "log":
 
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 printLog(getBranchId(getCurrentBranch()));
                 break;
             case "global-log":
 
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 printGlobalLog();
                 break;
             case "find":
 
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 findCommit(args[1]);
                 break;
             case "status":
 
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 getRepoStatus();
                 break;
             case "reset":
 
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 resetBranch(args[1]);
                 break;
             case "commit":
 
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 if (args.length < 2 || args[1].isEmpty()) {
                     System.out.println("Please enter a commit message.");
                     System.exit(0);
@@ -118,13 +118,13 @@ public class Main {
                 break;
             case "ls-files":
 
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 //listIndex();
                 System.out.println(getIndexInstance().getIndexPair());
                 break;
             case "show":
 
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 if (args.length < 2) {
                     showLatestCommit();
                 } else {
@@ -133,7 +133,7 @@ public class Main {
                 }
                 break;
             case "hash-object":
-                checkRepoNotExists();
+                checkRepoDoesNotExist();
                 System.out.println(GitletObject.hashFileObject(args[1]));
                 break;
             default:
