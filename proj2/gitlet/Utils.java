@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static gitlet.GitletObject.getHashAlgo;
@@ -245,11 +246,10 @@ class Utils {
      * @return formatted date
      */
     static String getFormattedTime(Date date) {
-        TimeZone.setDefault(TimeZone.getTimeZone("IST")); // get Indian Standard Time
-
-        return String.format(Locale.US,
-                "%ta %tb %td %tT %tY %tz",
-                date, date, date, date, date, date);
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy Z");
+        sdf.setTimeZone(TimeZone.getTimeZone("IST"));
+        String formattedTime = sdf.format(date);
+        return formattedTime;
     }
 
 
