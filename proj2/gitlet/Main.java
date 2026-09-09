@@ -66,6 +66,10 @@ public class Main {
                 checkRepoDoesNotExist();
                 removeBranch(args[1]);
                 break;
+            case "merge":
+                checkRepoDoesNotExist();
+                mergeBranch(args[1]);
+                break;
             case "checkout":
                 checkRepoDoesNotExist();
                 if (args.length == 2) {
