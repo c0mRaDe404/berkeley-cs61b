@@ -10,20 +10,14 @@ import static gitlet.GitletCommitObj.createCommitObject;
 import static gitlet.GitletIndex.getIndexInstance;
 import static gitlet.Utils.*;
 
-import gitlet.GitletCommitObj;
-
-// TODO: any imports you need here
 
 /**
  * Represents a gitlet repository.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
  *
  * @author Bhuvanesh
  */
 public class GitletRepository {
     /**
-     * TODO: add instance variables here.
      *
      * List all instance variables of the Repository class here with a useful
      * comment above them describing what that variable represents and how that
@@ -126,12 +120,14 @@ public class GitletRepository {
      */
     private static void createRepository() {
         if (repoExists()) {
-            System.err.println("A Gitlet version-control system already exists in the current directory.");
+            System.err.println("A Gitlet version-control system " +
+                    "already exists in the current directory.");
             System.exit(0);
         }
 
         if (!makeGitletRepo()) {
-            System.out.println("Can't setup the" + getRepoPath() + " directory!");
+            System.out.println("Can't setup the"
+                    + getRepoPath() + " directory!");
             System.exit(0);
         }
 
@@ -156,7 +152,8 @@ public class GitletRepository {
         GitletCommitObj initialCommit = createCommitObject("initial commit",
                 getFormattedTime(new Date(0))); // creating the initial commit
 
-        createBranch(getDefaultBranch(), createCommit(initialCommit)); // create the default branch and add the commit id
+        /* create the default branch and add the commit id */
+        createBranch(getDefaultBranch(), createCommit(initialCommit));
 
     }
 
@@ -176,7 +173,8 @@ public class GitletRepository {
         return status;
     }
 
-    private static Map<String, List<String>> getSnapshotStatus(GitletIndex index, GitletCommitObj currentCommit) {
+    private static Map<String, List<String>> getSnapshotStatus(GitletIndex index,
+                                                               GitletCommitObj currentCommit) {
 
 
         Map<String, List<String>> status = new HashMap<>();
@@ -194,7 +192,8 @@ public class GitletRepository {
         return status;
     }
 
-    public static List<String> getUntrackedStatus(GitletIndex index, GitletCommitObj currentCommit) {
+    public static List<String> getUntrackedStatus(GitletIndex index,
+                                                  GitletCommitObj currentCommit) {
         List<String> untracked = new ArrayList<>();
         for (String file : Utils.plainFilenamesIn(CWD)) {
             if (!index.isTracked(currentCommit, file)) {

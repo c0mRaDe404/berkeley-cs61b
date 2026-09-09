@@ -45,9 +45,9 @@ public class Main {
                 GitletRepository.initRepo();
                 break;
             case "add":
-                // TODO: check if a user is in a gitlet ininitialized directory, otherwise exit
-                // TODO: handle the `add [filename]` command
-                // TODO: check not only argument count, but also appropriateness
+                // check if a user is in a gitlet ininitialized directory, otherwise exit
+                // handle the `add [filename]` command
+                // check not only argument count, but also appropriateness
 
                 checkRepoExists();
                 stageFile(getCurrentCommit(), args[1]);

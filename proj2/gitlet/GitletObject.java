@@ -4,7 +4,6 @@ import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static gitlet.GitletErrorMsg.checkFileExists;
 import static gitlet.GitletRepository.CWD;
 import static gitlet.GitletRepository.GITLET_DIR;
 import static gitlet.Utils.join;
@@ -23,7 +22,7 @@ public class GitletObject {
     }
 
     public static String getHashAlgo() {
-       return HASH_ALGO;
+        return HASH_ALGO;
     }
 
     public static String hashObject(Object... contents) {
@@ -43,7 +42,7 @@ public class GitletObject {
 
     public static String getObjPathComplete(String type, String commitId) {
 
-        if (commitId.length() == DIGEST_LENGTH){
+        if (commitId.length() == DIGEST_LENGTH) {
             return commitId;
         }
 

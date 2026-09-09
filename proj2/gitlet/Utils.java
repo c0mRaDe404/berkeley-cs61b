@@ -18,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static gitlet.GitletObject.getHashAlgo;
-import static gitlet.GitletRepository.CWD;
 
 
 /** Assorted utilities.

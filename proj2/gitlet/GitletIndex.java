@@ -56,8 +56,8 @@ public class GitletIndex implements Serializable {
 
 
         boolean fileExists = join(CWD, file).exists();
-        return (currentCommit.getSnapshot().hasEntry(file) && !fileExists) ||
-                (getIndexInstance().hasEntry(file) && !fileExists);
+        return (currentCommit.getSnapshot().hasEntry(file) && !fileExists)
+                || (getIndexInstance().hasEntry(file) && !fileExists);
     }
 
     public boolean isModified(GitletCommitObj currentCommit, String file) {
@@ -69,18 +69,21 @@ public class GitletIndex implements Serializable {
 
 
         GitletIndex currentIndex = getIndexInstance();
-
-        String fileIdCommit = currentCommit.getSnapshot().getIndexEntry(file); // version from the commit
-        String fileIdIndex = currentIndex.getIndexEntry(file); // version from the index
-        String fileIdWorkingTree = hashFileObject(file); // version from the working tree
+        /* version from the commit */
+        String fileIdCommit = currentCommit.getSnapshot().getIndexEntry(file);
+        /* version from the index */
+        String fileIdIndex = currentIndex.getIndexEntry(file);
+        /* version from the working tree */
+        String fileIdWorkingTree = hashFileObject(file);
 
 
         if (fileIdCommit == null) {
            return !fileIdWorkingTree.equals(fileIdIndex);
-        } else if (fileIdIndex == null){
+        } else if (fileIdIndex == null) {
             return !fileIdWorkingTree.equals(fileIdCommit);
         } else {
-            return !(fileIdWorkingTree.equals(fileIdIndex) || fileIdWorkingTree.equals(fileIdCommit));
+            return !(fileIdWorkingTree.equals(fileIdIndex)
+                    || fileIdWorkingTree.equals(fileIdCommit));
         }
     }
 
@@ -96,7 +99,7 @@ public class GitletIndex implements Serializable {
 
         if (index.isTracked(currentCommit, file)) { // if it's tracked
             if (index.isRemoved(currentCommit, file)) {
-              removeFile(currentCommit, file);
+                removeFile(currentCommit, file);
             } else if (index.isModified(currentCommit, file)) { // and also modified
                 index.addToIndex(file); // then add it
             } else if (index.hasEntry(file)) { // not modified? but already staged?

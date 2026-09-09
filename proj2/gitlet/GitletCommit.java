@@ -98,7 +98,8 @@ public class GitletCommit {
         if (currentCommitObj == null) {
             return getIndexInstance();
         } else {
-            HashMap<String, String> newSnapshot = new HashMap<>(currentCommitObj.getSnapshot().getIndexPair());
+            HashMap<String, String> newSnapshot;
+            newSnapshot = new HashMap<>(currentCommitObj.getSnapshot().getIndexPair());
 
             for (Map.Entry<String, String> pair : index.getIndexPair().entrySet()) {
                 if (pair.getValue() == null) {
@@ -133,12 +134,15 @@ public class GitletCommit {
 
         GitletIndex currentIndex = getIndexInstance(); // fetch the current index object
 
-        if (!currentIndex.hasStagedFiles()) { // is there some way to prevent multiple index file reads? nvm
+        // is there some way to prevent multiple index file reads? nvm
+        if (!currentIndex.hasStagedFiles()) {
             System.err.println("No changes added to the commit.");
             System.exit(0);
         }
 
-        GitletCommitObj commitObj = GitletCommitObj.createCommitObject(commitMsg, getFormattedTime(new Date()), currentIndex);
+        GitletCommitObj commitObj = GitletCommitObj.createCommitObject(commitMsg,
+                                                                       getFormattedTime(new Date()),
+                                                                       currentIndex);
         commitObj.addParent(getBranchId(getCurrentBranch()));
         updateBranch(getCurrentBranch(), createCommit(commitObj));
         clearIndex();

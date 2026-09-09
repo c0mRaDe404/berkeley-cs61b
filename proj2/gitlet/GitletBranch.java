@@ -7,7 +7,6 @@ import java.util.Set;
 
 import static gitlet.GitletCommit.getCommit;
 import static gitlet.GitletCommit.getCurrentCommit;
-import static gitlet.GitletErrorMsg.checkRepoExists;
 import static gitlet.GitletIndex.clearIndex;
 import static gitlet.GitletObject.getObjPathComplete;
 import static gitlet.GitletObject.getObjectPath;
@@ -163,7 +162,8 @@ public class GitletBranch {
 
     public static void checkUntracked() {
         if (untrackedExists()) {
-            System.err.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.err.println("There is an untracked file in the way; " +
+                    "delete it, or add and commit it first.");
             System.exit(0);
         }
     }
@@ -199,8 +199,11 @@ public class GitletBranch {
         String branchId = getBranchId(branchName);
         checkUntracked();
         checkBranchValidity(branchId);
-
-        checkoutCommit(getCommit(branchId)); // getCommit always get a valid branchId cuz of checkBranchValidity
+        /**
+            getCommit always get a valid branchId
+            cuz of checkBranchValidity
+         **/
+        checkoutCommit(getCommit(branchId));
         updateHead(branchName);
         clearIndex();
     }
