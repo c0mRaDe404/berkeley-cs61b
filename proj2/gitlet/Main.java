@@ -1,9 +1,13 @@
 package gitlet;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.*;
 import static gitlet.GitletErrorMsg.*;
 import static gitlet.GitletIndex.*;
+import static gitlet.GitletMerge.*;
 import static gitlet.GitletObject.getObjPathComplete;
 import static gitlet.GitletStatus.getRepoStatus;
 
@@ -68,7 +72,20 @@ public class Main {
                 break;
             case "merge":
                 checkRepoDoesNotExist();
-                mergeBranch(args[1]);
+                GitletMerge.CommitGraph y = depthFind(getBranchId(getCurrentBranch()), getBranchId(args[1]));
+
+//                generations(getBranchId("master"), y);
+//                generations(getBranchId("new-branch"), y);
+                //getCommitGraph(getBranchId(args[1]), y).forEach(System.out::println);
+
+//                generations(getBranchId("master"), y).forEach((key, value) -> {
+//                    System.out.println(key + ":" + value);
+//                });
+//                generations(getBranchId("new-branch"), y).forEach((key, value) -> {
+//                    System.out.println(key + ":" + value);
+//                });
+                System.out.println(findMergeBase(getBranchId("master"),
+                        getBranchId("new-branch"), y));
                 break;
             case "checkout":
                 checkRepoDoesNotExist();

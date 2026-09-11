@@ -230,21 +230,5 @@ public class GitletBranch {
     }
 
 
-    /** merges the target branch to the current branch
-     *
-     * @param targetBranchId
-     */
-    public static void mergeBranch(String targetBranchId) {
-        /* check branch exists */
-        GitletErrorMsg.checkBranchValidity(targetBranchId);
 
-        /* get current branch */
-        String currentBranchId = getBranchId(getCurrentBranch());
-
-        if (targetBranchId.equals(currentBranchId)) {
-           System.err.println("Given branch is an ancestor of the current branch.");
-           System.exit(0);
-        }
-
-    }
 }
