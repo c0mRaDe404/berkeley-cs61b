@@ -3,20 +3,40 @@ package gitlet;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.getCommit;
+import static gitlet.GitletCommit.getCurrentCommit;
+import static gitlet.GitletIndex.clearIndex;
+import static gitlet.GitletIndex.stageFile;
+import static gitlet.GitletRepository.CWD;
+import static gitlet.GitletRepository.deleteFile;
+import static gitlet.Utils.join;
 
 public class GitletMerge {
 
-    /* make it private after testing bruh, remember ABSTRACTIONNNNN */
+    /** holds nodes-depth mapping and nodes-parents mapping
+     *
+      */
     public static class CommitGraph {
-        HashMap<String, Integer> depth;
-        HashMap<String, List<String>> parentCache;
+        private final HashMap<String, Integer> depth;
+        private final HashMap<String, List<String>> parentCache;
 
         CommitGraph() {
             depth = new HashMap<>();
             parentCache = new HashMap<>();
         }
 
+        public HashMap<String, Integer> getDepth() {
+            return depth;
+        }
+
+        public HashMap<String, List<String>> getParentCache() {
+            return parentCache;
+        }
+
+        /** print parentCache nicely
+         *
+         */
         void printParentsFormatted() {
             parentCache.forEach((node, parent) -> {
                 System.out.print(node.substring(0, 6) + ":" + parent.stream()
@@ -25,6 +45,9 @@ public class GitletMerge {
             });
         }
 
+        /** print depth map nicely
+         *
+         */
         void printDepthFormatted() {
             depth.entrySet().stream()
                     .sorted(Map.Entry.comparingByValue())
@@ -36,6 +59,9 @@ public class GitletMerge {
 
 
     /* make it private after testing bruhhhhh */
+    /** just a helper class to store commits and their depth
+     *
+     */
     public static class CommitNode implements Comparable<CommitNode> {
         String commitId;
         Integer depth;
@@ -170,7 +196,12 @@ public class GitletMerge {
         return commitNodes;
     }
 
-
+    /** helper to commits by generations (depth)
+     *
+     * @param commitId
+     * @param commitGraph
+     * @return map of grouped commits by their depth
+     */
     public static Map<Integer, Set<String>> generations(String commitId, CommitGraph commitGraph) {
         /* grouping commits by their depth */
         return getCommitGraph(commitId, commitGraph).stream()
@@ -181,37 +212,151 @@ public class GitletMerge {
                 ));
     }
 
+    /** given two commits, findMergeBase returns the latest common ancestor
+     *
+     * @param currentCommitId
+     * @param targetCommitId
+     * @param commitGraph
+     * @return the latest common ancestor
+     */
+    public static String findMergeBase(
+            String currentCommitId, // current branch
+            String targetCommitId, // target branch
+            CommitGraph commitGraph) {
+
+        var current = generations(currentCommitId, commitGraph);
+        var target = generations(targetCommitId, commitGraph);
 
 
-   public static String findMergeBase(
-           String currentCommitId,
-           String targetCommitId,
-           CommitGraph commitGraph) {
+        var iterCurrent = current.entrySet().iterator();
+        var iterTarget = target.entrySet().iterator();
 
-       var current = generations(currentCommitId, commitGraph);
-       var target = generations(targetCommitId, commitGraph);
+        var currentDepth = iterCurrent.next();
+        var targetDepth = iterTarget.next();
 
-       var iterCurrent = current.entrySet().iterator();
-       var iterTarget = target.entrySet().iterator();
-
-       while (iterTarget.hasNext() && iterCurrent.hasNext()) {
-             var currentDepth = iterCurrent.next();
-           var targetDepth = iterTarget.next();
+        while (iterTarget.hasNext() && iterCurrent.hasNext()) {
             if (currentDepth.getKey().equals(targetDepth.getKey())) {
-                    for (String commit: currentDepth.getValue()) {
-                       if (targetDepth.getValue().contains(commit)) {
-                           return commit;
-                       }
+                for (String commit : currentDepth.getValue()) {
+                    if (targetDepth.getValue().contains(commit)) {
+                        return commit;
                     }
+                }
+                /* walk down paths at the same time */
+                currentDepth = iterCurrent.next();
+                targetDepth = iterTarget.next();
             } else if (currentDepth.getKey() > targetDepth.getKey()) {
-                    targetDepth = iterTarget.next();
+                targetDepth = iterTarget.next();
             } else {
                 currentDepth = iterCurrent.next();
             }
-       }
+        }
 
-       return null;
-   }
+        return null;
+    }
 
+
+    /**
+     * merge two branches
+     *
+     * @param cBranch
+     * @param tBranch
+     * @param commitGraph
+     * @return true if conflict, otherwise false
+     */
+    public static boolean mergeBranches(
+            String cBranch,
+            String tBranch,
+            CommitGraph commitGraph) {
+
+        String cbId = getBranchId(cBranch); /* current branch id */
+        String tbId = getBranchId(tBranch); /* given branch id */
+
+        /* merge base id */
+        String mergeBaseId = findMergeBase(cbId, tbId, commitGraph);
+        GitletCommitObj mergeBaseCommitObj = getCommit(mergeBaseId);
+        GitletCommitObj currentCommitObj = getCommit(cbId);
+        GitletCommitObj targetCommitObj = getCommit(tbId);
+
+        if (mergeBaseId.equals(tbId)) {
+            System.out.println("Given branch is an ancestor of the current branch.");
+            System.exit(0);
+        } else if (mergeBaseId.equals(cbId)) {
+            checkoutCommit(getCommit(tbId));
+            updateBranch(cBranch, tbId);
+            clearIndex(); /* do i need to clear index? */
+            System.out.println("Current branch fast-forwarded.");
+            System.exit(0);
+        } else {
+            Set<String> modifiedCurrent = getModifiedFiles(mergeBaseCommitObj, currentCommitObj);
+            Set<String> modifiedTarget = getModifiedFiles(mergeBaseCommitObj, targetCommitObj);
+
+            for (String file: modifiedTarget) {
+                /* condition where the current branch
+                   has not modified any files since the
+                   split point
+                 */
+               if (!modifiedCurrent.contains(file)) {
+                   if (targetCommitObj.getSnapshot().getIndexEntry(file) == null) {
+                      deleteFile(join(CWD, file));
+                   }
+
+                   checkoutFile(targetCommitObj, file);
+                   stageFile(getCurrentCommit(), file);
+               } else {
+                   /* conflict case, the same files have been modified */
+                  String cFileId = currentCommitObj.getSnapshot().getIndexEntry(file);
+                  String tFileId = targetCommitObj.getSnapshot().getIndexEntry(file);
+
+                   if (!(cFileId == null && tFileId == null)) {
+                        if (!cFileId.equals(tFileId)) {
+                           /* actual conflict between files */
+                        }
+                   }
+
+               }
+
+            }
+
+            Set<String> targetFiles = targetCommitObj
+                    .getSnapshot()
+                    .getIndexPair()
+                    .keySet()
+                    .stream()
+                    .filter(file -> !mergeBaseCommitObj.getSnapshot().hasEntry(file))
+                    .collect(Collectors.toSet());
+
+           for (String file: targetFiles) {
+              checkoutFile(currentCommitObj, file);
+              stageFile(currentCommitObj, file);
+           }
+
+        }
+
+        return false;
+    }
+
+
+    /** returns what files have been changed since the split point
+     *
+     * @param mergeBaseCommitObj
+     * @param targetCommitObj
+     * @return a list of files that have been modified since the split happened
+     */
+    public static Set<String> getModifiedFiles(
+            GitletCommitObj mergeBaseCommitObj,
+            GitletCommitObj targetCommitObj) {
+
+        /* get the snapshot of the merge base */
+        GitletIndex m = mergeBaseCommitObj.getSnapshot();
+
+        /* get the snapshot of the target branch */
+        GitletIndex t = targetCommitObj.getSnapshot();
+
+
+        return m.getIndexPair().keySet().stream()
+                .filter(key -> !m.getIndexEntry(key).equals(t.getIndexEntry(key)))
+                .collect(Collectors.toSet());
+
+    }
 
 }

@@ -1,7 +1,6 @@
 package gitlet;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.*;
@@ -70,22 +69,19 @@ public class Main {
                 checkRepoDoesNotExist();
                 removeBranch(args[1]);
                 break;
+            case "merge-base":
+                checkRepoDoesNotExist();
+                GitletMerge.CommitGraph x = depthFind(getBranchId(getCurrentBranch()), getBranchId(args[1]));
+                x.printParentsFormatted();
+                System.out.println();
+                x.printDepthFormatted();
+                mergeBranches(getCurrentBranch(), args[1], x);
+                break;
             case "merge":
                 checkRepoDoesNotExist();
                 GitletMerge.CommitGraph y = depthFind(getBranchId(getCurrentBranch()), getBranchId(args[1]));
 
-//                generations(getBranchId("master"), y);
-//                generations(getBranchId("new-branch"), y);
-                //getCommitGraph(getBranchId(args[1]), y).forEach(System.out::println);
-
-//                generations(getBranchId("master"), y).forEach((key, value) -> {
-//                    System.out.println(key + ":" + value);
-//                });
-//                generations(getBranchId("new-branch"), y).forEach((key, value) -> {
-//                    System.out.println(key + ":" + value);
-//                });
-                System.out.println(findMergeBase(getBranchId("master"),
-                        getBranchId("new-branch"), y));
+                mergeBranches(getCurrentBranch(), args[1], y);
                 break;
             case "checkout":
                 checkRepoDoesNotExist();
@@ -107,6 +103,14 @@ public class Main {
 
                 checkRepoDoesNotExist();
                 printLog(getBranchId(getCurrentBranch()));
+                break;
+            case "log-all":
+                GitletMerge.CommitGraph s = depthFind(getBranchId(getCurrentBranch()), getBranchId(args[1]));
+                s.getDepth().entrySet().stream()
+                        .sorted(Map.Entry.comparingByValue())
+                        .forEach((n) -> {
+                            showCommit(n.getKey(), getCommit(n.getKey()));
+                        });
                 break;
             case "global-log":
 

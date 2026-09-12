@@ -215,20 +215,23 @@ public class GitletBranch {
 
 
     public static void checkoutFile(GitletCommitObj commitObj, String file) {
-        GitletIndex snapshot = commitObj.getSnapshot();
-        checkFileExistsInCommit(snapshot, file);
-
         File newFile = join(CWD, file);
-
-        if (!newFile.exists()) {
-            createFile(newFile);
-        }
-
-        File objPath =  getObjectPath("blob", snapshot.getIndexEntry(file));
-        String contents = readContentsAsString(objPath);
-        Utils.writeContents(newFile, contents);
+        checkoutFile(commitObj, newFile);
     }
 
+    public static void checkoutFile(GitletCommitObj commitObj, File file) {
+        GitletIndex snapshot = commitObj.getSnapshot();
+        String fileNameString = file.getName();
+        checkFileExistsInCommit(snapshot, fileNameString);
+
+        if (!file.exists()) {
+            createFile(file);
+        }
+
+        File objPath =  getObjectPath("blob", snapshot.getIndexEntry(fileNameString));
+        String contents = readContentsAsString(objPath);
+        Utils.writeContents(file, contents);
+    }
 
 
 }
