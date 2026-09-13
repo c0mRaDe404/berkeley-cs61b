@@ -1,22 +1,24 @@
 package gitlet;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.getCommit;
-import static gitlet.GitletCommit.getCurrentCommit;
 import static gitlet.GitletIndex.clearIndex;
 import static gitlet.GitletIndex.stageFile;
+import static gitlet.GitletObject.getObjectPath;
 import static gitlet.GitletRepository.CWD;
 import static gitlet.GitletRepository.deleteFile;
-import static gitlet.Utils.join;
+import static gitlet.Utils.*;
 
 public class GitletMerge {
 
-    /** holds nodes-depth mapping and nodes-parents mapping
+    /**
+     * holds nodes-depth mapping and nodes-parents mapping
      *
-      */
+     */
     public static class CommitGraph {
         private final HashMap<String, Integer> depth;
         private final HashMap<String, List<String>> parentCache;
@@ -34,7 +36,8 @@ public class GitletMerge {
             return parentCache;
         }
 
-        /** print parentCache nicely
+        /**
+         * print parentCache nicely
          *
          */
         void printParentsFormatted() {
@@ -45,7 +48,8 @@ public class GitletMerge {
             });
         }
 
-        /** print depth map nicely
+        /**
+         * print depth map nicely
          *
          */
         void printDepthFormatted() {
@@ -59,7 +63,9 @@ public class GitletMerge {
 
 
     /* make it private after testing bruhhhhh */
-    /** just a helper class to store commits and their depth
+
+    /**
+     * just a helper class to store commits and their depth
      *
      */
     public static class CommitNode implements Comparable<CommitNode> {
@@ -196,7 +202,8 @@ public class GitletMerge {
         return commitNodes;
     }
 
-    /** helper to commits by generations (depth)
+    /**
+     * helper to commits by generations (depth)
      *
      * @param commitId
      * @param commitGraph
@@ -212,7 +219,8 @@ public class GitletMerge {
                 ));
     }
 
-    /** given two commits, findMergeBase returns the latest common ancestor
+    /**
+     * given two commits, findMergeBase returns the latest common ancestor
      *
      * @param currentCommitId
      * @param targetCommitId
@@ -261,9 +269,8 @@ public class GitletMerge {
      * @param cBranch
      * @param tBranch
      * @param commitGraph
-     * @return true if conflict, otherwise false
      */
-    public static boolean mergeBranches(
+    public static void mergeBranches(
             String cBranch,
             String tBranch,
             CommitGraph commitGraph) {
@@ -271,11 +278,19 @@ public class GitletMerge {
         String cbId = getBranchId(cBranch); /* current branch id */
         String tbId = getBranchId(tBranch); /* given branch id */
 
+        boolean conflict = false;
         /* merge base id */
         String mergeBaseId = findMergeBase(cbId, tbId, commitGraph);
+
+        /* commit objects */
         GitletCommitObj mergeBaseCommitObj = getCommit(mergeBaseId);
         GitletCommitObj currentCommitObj = getCommit(cbId);
         GitletCommitObj targetCommitObj = getCommit(tbId);
+
+        /* index snapshot from commits */
+        GitletIndex sFiles = mergeBaseCommitObj.getSnapshot();
+        GitletIndex cFiles = currentCommitObj.getSnapshot();
+        GitletIndex tFiles = targetCommitObj.getSnapshot();
 
         if (mergeBaseId.equals(tbId)) {
             System.out.println("Given branch is an ancestor of the current branch.");
@@ -287,56 +302,153 @@ public class GitletMerge {
             System.out.println("Current branch fast-forwarded.");
             System.exit(0);
         } else {
-            Set<String> modifiedCurrent = getModifiedFiles(mergeBaseCommitObj, currentCommitObj);
-            Set<String> modifiedTarget = getModifiedFiles(mergeBaseCommitObj, targetCommitObj);
 
-            for (String file: modifiedTarget) {
-                /* condition where the current branch
-                   has not modified any files since the
-                   split point
-                 */
-               if (!modifiedCurrent.contains(file)) {
-                   if (targetCommitObj.getSnapshot().getIndexEntry(file) == null) {
-                      deleteFile(join(CWD, file));
-                   }
 
-                   checkoutFile(targetCommitObj, file);
-                   stageFile(getCurrentCommit(), file);
-               } else {
-                   /* conflict case, the same files have been modified */
-                  String cFileId = currentCommitObj.getSnapshot().getIndexEntry(file);
-                  String tFileId = targetCommitObj.getSnapshot().getIndexEntry(file);
 
-                   if (!(cFileId == null && tFileId == null)) {
-                        if (!cFileId.equals(tFileId)) {
-                           /* actual conflict between files */
+            for (String file : sFiles.getIndexPair().keySet()) {
+                String sFile = sFiles.getIndexEntry(file);
+                String cFile = cFiles.getIndexEntry(file);
+                String tFile = tFiles.getIndexEntry(file);
+
+                if (sFile.equals(cFile)) {
+                    /* not modified in the current branch */
+                    if (!sFile.equals(tFile)) {
+                        if (tFile == null) {
+                            deleteFile(join(CWD, file));
+                        } else {
+                            /* modified in the target branch */
+                            checkoutFile(targetCommitObj, tFile);
+                            stageFile(currentCommitObj, tFile);
                         }
-                   }
+                    } else {
+                        /* not modified in the target branch as well */
+                    }
+                } else {
+                    /* modified in the current branch */
+                    /* different contents or null/removed */
 
-               }
+                    File curObjPath = getObjectPath(
+                            "blob",
+                            cFiles
+                                    .getIndexEntry(file));
 
+                    File targetObjPath = getObjectPath(
+                            "blob",
+                            tFiles
+                                    .getIndexEntry(file));
+
+                    if (!sFile.equals(tFile)) {
+                        /* modified in the target branch as well */
+                        /* different contents or null/removed */
+                        if (cFile == null) {
+                            if (tFile == null) {
+                                /* the same file was removed from both branches */
+                            } else {
+                              /* file removed from the current branch
+                              but exists in the target branch
+                               */
+                                /* conflict */
+                                conflict = true;
+                                mergeFiles(join(CWD, file), null, targetObjPath);
+                            }
+                        } else {
+                            if (tFile == null) {
+                             /* file exists in the current branch
+                             but removed from the target branch
+                              */
+                                /* conflict */
+                                conflict = true;
+                                mergeFiles(join(CWD, file), curObjPath, null);
+
+                            } else {
+                                /* both have been modified since the split point */
+                                /* conflict */
+                                /* read contents from both versions */
+                                /* insert markers */
+                                conflict = true;
+                                mergeFiles(join(CWD, file), curObjPath, targetObjPath);
+                            }
+                        }
+                    }
+                }
             }
 
-            Set<String> targetFiles = targetCommitObj
+            /* checkout the file that are not in the split point
+             and not in the current commit.
+             */
+            Set<String> newFilesTargetBranch = targetCommitObj
                     .getSnapshot()
                     .getIndexPair()
                     .keySet()
                     .stream()
-                    .filter(file -> !mergeBaseCommitObj.getSnapshot().hasEntry(file))
+                    .filter(key -> !mergeBaseCommitObj.getSnapshot().hasEntry(key))
                     .collect(Collectors.toSet());
 
-           for (String file: targetFiles) {
-              checkoutFile(currentCommitObj, file);
-              stageFile(currentCommitObj, file);
-           }
+
+            for (String file: newFilesTargetBranch) {
+
+                File curObjPath = getObjectPath(
+                        "blob",
+                             cFiles
+                                .getIndexEntry(file));
+
+                File targetObjPath = getObjectPath(
+                        "blob",
+                        tFiles
+                                .getIndexEntry(file));
+
+
+               if (cFiles.hasEntry(file)) {
+
+                  if (!cFiles.getIndexEntry(file).equals(tFiles.getIndexEntry(file))) {
+                      conflict = true;
+                     mergeFiles(join(CWD, file), curObjPath, targetObjPath);
+                  }
+               } else {
+                   checkoutFile(targetCommitObj, file);
+               }
+            }
 
         }
 
-        return false;
+        if (conflict) {
+            System.out.println("Merged " + tBranch + " into " + cBranch + ".");
+            System.exit(0);
+        } else {
+           System.err.println("Encountered a merge conflict.");
+           System.exit(0);
+        }
+
     }
 
 
-    /** returns what files have been changed since the split point
+    public static void mergeFiles(
+            File file,
+            File curObjPath,
+            File targetObjPath) {
+
+        String currentContents = "";
+        String targetContents = "";
+
+        if (curObjPath != null) {
+            currentContents = readContentsAsString(curObjPath);
+        }
+
+        if (targetObjPath != null) {
+            targetContents = readContentsAsString(targetObjPath);
+        }
+
+        StringBuilder merged = new StringBuilder();
+        merged.append("<<<<<<< HEAD\n");
+        merged.append(currentContents);
+        merged.append("\n=======\n");
+        merged.append(targetContents);
+        merged.append("\n>>>>>>>");
+        writeContents(file, merged.toString());
+    }
+
+    /**
+     * returns what files have been changed since the split point
      *
      * @param mergeBaseCommitObj
      * @param targetCommitObj
