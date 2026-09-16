@@ -427,8 +427,6 @@ public class GitletMerge {
             }
 
             makeMergeCommit(cBranch, tBranch, cbId, tbId, currentIndex);
-            System.out.println("Merged " + tBranch + " into " + cBranch + ".");
-            System.exit(0);
         } else {
             System.err.println("Encountered a merge conflict.");
             System.exit(0);
