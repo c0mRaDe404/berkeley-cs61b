@@ -215,9 +215,9 @@ public class GitletMerge {
         /* grouping commits by their depth */
         return getCommitGraph(commitId, commitGraph).stream()
                 .collect(Collectors.groupingBy(
-                        node -> node.depth,
-                        LinkedHashMap::new,
-                        Collectors.mapping(node -> node.commitId, Collectors.toSet())
+                    node -> node.depth,
+                    LinkedHashMap::new,
+                    Collectors.mapping(node -> node.commitId, Collectors.toSet())
                 ));
     }
 
@@ -237,23 +237,20 @@ public class GitletMerge {
         var current = generations(currentCommitId, commitGraph);
         var target = generations(targetCommitId, commitGraph);
 
-
         var iterCurrent = current.entrySet().iterator();
         var iterTarget = target.entrySet().iterator();
 
-        var currentDepth = iterCurrent.next();
-        var targetDepth = iterTarget.next();
 
         while (iterTarget.hasNext() && iterCurrent.hasNext()) {
+            var currentDepth = iterCurrent.next();
+            var targetDepth = iterTarget.next();
+
             if (currentDepth.getKey().equals(targetDepth.getKey())) {
                 for (String commit : currentDepth.getValue()) {
                     if (targetDepth.getValue().contains(commit)) {
                         return commit;
                     }
                 }
-                /* walk down paths at the same time */
-                currentDepth = iterCurrent.next();
-                targetDepth = iterTarget.next();
             } else if (currentDepth.getKey() > targetDepth.getKey()) {
                 targetDepth = iterTarget.next();
             } else {
