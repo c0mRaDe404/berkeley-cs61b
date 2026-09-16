@@ -72,7 +72,7 @@ public class Main {
             case "merge":
                 checkRepoDoesNotExist();
                 checkUntracked();
-                GitletMerge.CommitGraph y = depthFind(getBranchId(getCurrentBranch()), getBranchId(args[1]));
+
                 GitletIndex currentIndex = getIndexInstance();
 
                 if (currentIndex.hasStagedFiles()
@@ -90,6 +90,8 @@ public class Main {
                     System.err.println("Cannot merge a branch with itself.");
                     System.exit(0);
                 }
+
+                GitletMerge.CommitGraph y = depthFind(getBranchId(getCurrentBranch()), getBranchId(args[1]));
                 mergeBranches(getCurrentBranch(), args[1], y);
                 break;
             case "checkout":

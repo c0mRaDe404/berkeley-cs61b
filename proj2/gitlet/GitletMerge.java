@@ -208,7 +208,10 @@ public class GitletMerge {
      * @param commitGraph
      * @return map of grouped commits by their depth
      */
-    public static Map<Integer, Set<String>> generations(String commitId, CommitGraph commitGraph) {
+    public static Map<Integer, Set<String>> generations(
+            String commitId,
+            CommitGraph commitGraph) {
+
         /* grouping commits by their depth */
         return getCommitGraph(commitId, commitGraph).stream()
                 .collect(Collectors.groupingBy(
@@ -265,7 +268,7 @@ public class GitletMerge {
     private static boolean handleMerge(
             GitletCommitObj mergeBaseCommitObj,
             GitletCommitObj currentCommitObj,
-            GitletCommitObj targetCommitObj ) {
+            GitletCommitObj targetCommitObj) {
 
 
         boolean conflict = false;
@@ -280,13 +283,13 @@ public class GitletMerge {
                 targetCommitObj
         );
 
-       return conflict;
+        return conflict;
     }
 
     private static boolean handleMergeFromBase(
             GitletCommitObj mergeBaseCommitObj,
             GitletCommitObj currentCommitObj,
-            GitletCommitObj targetCommitObj ) {
+            GitletCommitObj targetCommitObj) {
 
 
         GitletIndex sFiles = mergeBaseCommitObj.getSnapshot();
@@ -360,7 +363,7 @@ public class GitletMerge {
     private static boolean handleMergeFromTarget(
             GitletCommitObj mergeBaseCommitObj,
             GitletCommitObj currentCommitObj,
-            GitletCommitObj targetCommitObj ) {
+            GitletCommitObj targetCommitObj) {
             /* checkout the file that are not in the split point
              and not in the current commit.
              */
