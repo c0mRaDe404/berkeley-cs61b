@@ -262,6 +262,146 @@ public class GitletMerge {
     }
 
 
+    private static boolean handleMerge(
+            GitletCommitObj mergeBaseCommitObj,
+            GitletCommitObj currentCommitObj,
+            GitletCommitObj targetCommitObj ) {
+
+
+        boolean conflict = false;
+
+        conflict |= handleMergeFromBase(
+                mergeBaseCommitObj,
+                currentCommitObj,
+                targetCommitObj);
+        conflict |= handleMergeFromTarget(
+                mergeBaseCommitObj,
+                currentCommitObj,
+                targetCommitObj
+        );
+
+       return conflict;
+    }
+
+    private static boolean handleMergeFromBase(
+            GitletCommitObj mergeBaseCommitObj,
+            GitletCommitObj currentCommitObj,
+            GitletCommitObj targetCommitObj ) {
+
+
+        GitletIndex sFiles = mergeBaseCommitObj.getSnapshot();
+        GitletIndex cFiles = currentCommitObj.getSnapshot();
+        GitletIndex tFiles = targetCommitObj.getSnapshot();
+
+        boolean conflict = false;
+
+        for (String file : sFiles.getIndexPair().keySet()) {
+
+            String sFile = sFiles.getIndexEntry(file);
+            String cFile = cFiles.getIndexEntry(file);
+            String tFile = tFiles.getIndexEntry(file);
+
+            if (sFile.equals(cFile)) {
+                /* not modified in the current branch */
+                if (!sFile.equals(tFile)) {
+
+                    if (tFile == null) {
+                        deleteFile(join(CWD, file));
+                        removeFile(currentCommitObj, file);
+                    } else {
+                        /* modified in the target branch */
+                        checkoutFile(targetCommitObj, file);
+                        stageFile(currentCommitObj, file);
+                    }
+                }
+            } else {
+                /* modified in the current branch */
+                File curObjPath = getObjectPath(
+                        "blob",
+                        cFiles
+                                .getIndexEntry(file));
+
+                File targetObjPath = getObjectPath(
+                        "blob",
+                        tFiles
+                                .getIndexEntry(file));
+
+                if (!sFile.equals(tFile)) {
+                    /* modified in the target branch as well */
+                    if (cFile == null) {
+                        if (tFile != null) {
+                            /* conflict */
+                            conflict = true;
+                            mergeFiles(join(CWD, file), curObjPath, targetObjPath);
+                        }
+                    } else {
+                        if (tFile == null) {
+                            /* conflict */
+                            conflict = true;
+                            mergeFiles(join(CWD, file), curObjPath, targetObjPath);
+
+                        } else {
+                            /* conflict */
+                            conflict = true;
+                            mergeFiles(join(CWD, file), curObjPath, targetObjPath);
+                        }
+                    }
+                }
+            }
+        }
+
+        return conflict;
+    }
+
+
+    private static boolean handleMergeFromTarget(
+            GitletCommitObj mergeBaseCommitObj,
+            GitletCommitObj currentCommitObj,
+            GitletCommitObj targetCommitObj ) {
+            /* checkout the file that are not in the split point
+             and not in the current commit.
+             */
+
+
+        GitletIndex sFiles = mergeBaseCommitObj.getSnapshot();
+        GitletIndex cFiles = currentCommitObj.getSnapshot();
+        GitletIndex tFiles = targetCommitObj.getSnapshot();
+
+        boolean conflict = false;
+
+        Set<String> newFilesTargetBranch = targetCommitObj
+                .getSnapshot()
+                .getIndexPair()
+                .keySet()
+                .stream()
+                .filter(key -> !mergeBaseCommitObj.getSnapshot().hasEntry(key))
+                .collect(Collectors.toSet());
+
+        for (String file : newFilesTargetBranch) {
+
+            File curObjPath = getObjectPath(
+                    "blob",
+                    cFiles
+                            .getIndexEntry(file));
+
+            File targetObjPath = getObjectPath(
+                    "blob",
+                    tFiles
+                            .getIndexEntry(file));
+
+            if (cFiles.hasEntry(file)) {
+                if (!cFiles.getIndexEntry(file).equals(tFiles.getIndexEntry(file))) {
+                    conflict = true;
+                    mergeFiles(join(CWD, file), curObjPath, targetObjPath);
+                }
+            } else {
+                checkoutFile(targetCommitObj, file);
+                stageFile(currentCommitObj, file);
+            }
+        }
+        return conflict;
+    }
+
     /**
      * merge two branches
      *
@@ -285,9 +425,6 @@ public class GitletMerge {
         GitletCommitObj currentCommitObj = getCommit(cbId);
         GitletCommitObj targetCommitObj = getCommit(tbId);
 
-        GitletIndex sFiles = mergeBaseCommitObj.getSnapshot();
-        GitletIndex cFiles = currentCommitObj.getSnapshot();
-        GitletIndex tFiles = targetCommitObj.getSnapshot();
 
 
         if (mergeBaseId.equals(tbId)) {
@@ -300,94 +437,11 @@ public class GitletMerge {
             System.out.println("Current branch fast-forwarded.");
             System.exit(0);
         } else {
-            for (String file : sFiles.getIndexPair().keySet()) {
 
-                String sFile = sFiles.getIndexEntry(file);
-                String cFile = cFiles.getIndexEntry(file);
-                String tFile = tFiles.getIndexEntry(file);
-
-                if (sFile.equals(cFile)) {
-                    /* not modified in the current branch */
-                    if (!sFile.equals(tFile)) {
-
-                        if (tFile == null) {
-                            deleteFile(join(CWD, file));
-                            removeFile(currentCommitObj, file);
-                        } else {
-                            /* modified in the target branch */
-                            checkoutFile(targetCommitObj, file);
-                            stageFile(currentCommitObj, file);
-                        }
-                    }
-                } else {
-                    /* modified in the current branch */
-                    File curObjPath = getObjectPath(
-                            "blob",
-                            cFiles
-                                    .getIndexEntry(file));
-
-                    File targetObjPath = getObjectPath(
-                            "blob",
-                            tFiles
-                                    .getIndexEntry(file));
-
-                    if (!sFile.equals(tFile)) {
-                        /* modified in the target branch as well */
-                        if (cFile == null) {
-                            if (tFile != null) {
-                                /* conflict */
-                                conflict = true;
-                                mergeFiles(join(CWD, file), curObjPath, targetObjPath);
-                            }
-                        } else {
-                            if (tFile == null) {
-                                /* conflict */
-                                conflict = true;
-                                mergeFiles(join(CWD, file), curObjPath, targetObjPath);
-
-                            } else {
-                                /* conflict */
-                                conflict = true;
-                                mergeFiles(join(CWD, file), curObjPath, targetObjPath);
-                            }
-                        }
-                    }
-                }
-            }
-
-            /* checkout the file that are not in the split point
-             and not in the current commit.
-             */
-            Set<String> newFilesTargetBranch = targetCommitObj
-                    .getSnapshot()
-                    .getIndexPair()
-                    .keySet()
-                    .stream()
-                    .filter(key -> !mergeBaseCommitObj.getSnapshot().hasEntry(key))
-                    .collect(Collectors.toSet());
-
-            for (String file : newFilesTargetBranch) {
-
-                File curObjPath = getObjectPath(
-                        "blob",
-                        cFiles
-                                .getIndexEntry(file));
-
-                File targetObjPath = getObjectPath(
-                        "blob",
-                        tFiles
-                                .getIndexEntry(file));
-
-                if (cFiles.hasEntry(file)) {
-                    if (!cFiles.getIndexEntry(file).equals(tFiles.getIndexEntry(file))) {
-                        conflict = true;
-                        mergeFiles(join(CWD, file), curObjPath, targetObjPath);
-                    }
-                } else {
-                    checkoutFile(targetCommitObj, file);
-                    stageFile(currentCommitObj, file);
-                }
-            }
+            conflict = handleMerge(
+                    mergeBaseCommitObj,
+                    currentCommitObj,
+                    targetCommitObj);
         }
 
         if (!conflict) {
