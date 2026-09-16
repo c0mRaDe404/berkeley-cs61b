@@ -1,7 +1,5 @@
 package gitlet;
 
-import java.io.File;
-
 import static gitlet.GitletBranch.getCurrentBranch;
 import static gitlet.GitletBranch.untrackedExists;
 import static gitlet.GitletCommit.getCurrentCommit;

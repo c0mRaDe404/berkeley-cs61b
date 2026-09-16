@@ -1,9 +1,12 @@
 package gitlet;
 
+import java.util.Map;
+
 import static gitlet.GitletBranch.*;
 import static gitlet.GitletCommit.*;
 import static gitlet.GitletErrorMsg.*;
 import static gitlet.GitletIndex.*;
+import static gitlet.GitletMerge.*;
 import static gitlet.GitletObject.getObjPathComplete;
 import static gitlet.GitletStatus.getRepoStatus;
 
@@ -66,6 +69,31 @@ public class Main {
                 checkRepoDoesNotExist();
                 removeBranch(args[1]);
                 break;
+            case "merge":
+                checkRepoDoesNotExist();
+                checkUntracked();
+
+                GitletIndex currentIndex = getIndexInstance();
+
+                if (currentIndex.hasStagedFiles()
+                        || currentIndex.hasModifiedFiles(getCurrentCommit())) {
+                    System.err.println("You have uncommitted changes.");
+                    System.exit(0);
+                }
+
+                if (!branchExists(args[1])) {
+                    System.err.println("A branch with that name does not exist.");
+                    System.exit(0);
+                }
+
+                if (args[1].equals(getCurrentBranch())) {
+                    System.err.println("Cannot merge a branch with itself.");
+                    System.exit(0);
+                }
+
+                GitletMerge.CommitGraph y = depthFind(getBranchId(getCurrentBranch()), getBranchId(args[1]));
+                mergeBranches(getCurrentBranch(), args[1], y);
+                break;
             case "checkout":
                 checkRepoDoesNotExist();
                 if (args.length == 2) {
@@ -86,6 +114,14 @@ public class Main {
 
                 checkRepoDoesNotExist();
                 printLog(getBranchId(getCurrentBranch()));
+                break;
+            case "log-all":
+                GitletMerge.CommitGraph s = depthFind(getBranchId(getCurrentBranch()), getBranchId(args[1]));
+                s.getDepth().entrySet().stream()
+                        .sorted(Map.Entry.comparingByValue())
+                        .forEach((n) -> {
+                            showCommit(n.getKey(), getCommit(n.getKey()));
+                        });
                 break;
             case "global-log":
 

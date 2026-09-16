@@ -1,7 +1,6 @@
 package gitlet;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.*;
 
 import static gitlet.GitletBranch.*;
@@ -14,7 +13,7 @@ import static gitlet.Utils.getFormattedTime;
 public class GitletCommit {
 
     /**
-     * creates an empty commit with the given message and time
+     * creates a commit with the given message and time
      *
      * @param commitObj
      * @return sha1 message digest
@@ -77,12 +76,14 @@ public class GitletCommit {
         }
 
         GitletCommitObj commitObj = GitletCommitObj.createCommitObject(commitMsg,
-                                                                       getFormattedTime(new Date()),
-                                                                       currentIndex);
+                getFormattedTime(new Date()),
+                currentIndex);
+
         commitObj.addParent(getBranchId(getCurrentBranch()));
         updateBranch(getCurrentBranch(), createCommit(commitObj));
         clearIndex();
     }
+
 
     /**
      * deserialize the commit object
@@ -139,6 +140,15 @@ public class GitletCommit {
 
         System.out.println("===");
         System.out.println("commit " + commitId);
+        List<String> parents = commitObj.getParents();
+        StringBuilder parentString = new StringBuilder();
+        if (parents.size() >= 2) {
+            for (String parent : parents) {
+                parentString.append(parent, 0, 7).append(" ");
+            }
+            System.out.println("Merge: " + parentString);
+        }
+
         System.out.println("Date: " + commitObj.getTimestamp());
         System.out.println(commitObj.getMsg());
         System.out.println();

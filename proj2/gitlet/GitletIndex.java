@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import static gitlet.GitletCommit.getCommitSnapshot;
 import static gitlet.GitletErrorMsg.*;
 import static gitlet.GitletObject.createObjectFile;
 import static gitlet.GitletObject.hashFileObject;
@@ -204,6 +205,9 @@ public class GitletIndex implements Serializable {
         writeToIndex();
     }
 
+    public void removeFromIndexNoWrite(String file) {
+        INDEX.remove(file);
+    }
 
     /**
      * sort the index key-value pairs and concatenates them to one long string
@@ -233,6 +237,15 @@ public class GitletIndex implements Serializable {
         return !INDEX.isEmpty();
     }
 
+    public boolean hasModifiedFiles(GitletCommitObj commitObj) {
+
+        for (String file : getCommitSnapshot(getIndexInstance()).getIndexPair().keySet()) {
+            if (isModified(commitObj, file)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public HashMap<String, String> getIndexPair() {
         return (HashMap<String, String>) INDEX.clone();

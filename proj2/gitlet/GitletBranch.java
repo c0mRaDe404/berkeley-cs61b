@@ -136,6 +136,11 @@ public class GitletBranch {
         return join(GITLET_DIR, "refs", "heads", branchName);
     }
 
+
+    public static boolean branchExists(String branchName) {
+        return getBranchFile(branchName).exists();
+    }
+
     /**
      * gives the branchId for the given branch
      *
@@ -215,17 +220,23 @@ public class GitletBranch {
 
 
     public static void checkoutFile(GitletCommitObj commitObj, String file) {
-        GitletIndex snapshot = commitObj.getSnapshot();
-        checkFileExistsInCommit(snapshot, file);
-
         File newFile = join(CWD, file);
+        checkoutFile(commitObj, newFile);
+    }
 
-        if (!newFile.exists()) {
-            createFile(newFile);
+    public static void checkoutFile(GitletCommitObj commitObj, File file) {
+        GitletIndex snapshot = commitObj.getSnapshot();
+        String fileNameString = file.getName();
+        checkFileExistsInCommit(snapshot, fileNameString);
+
+        if (!file.exists()) {
+            createFile(file);
         }
 
-        File objPath =  getObjectPath("blob", snapshot.getIndexEntry(file));
+        File objPath =  getObjectPath("blob", snapshot.getIndexEntry(fileNameString));
         String contents = readContentsAsString(objPath);
-        Utils.writeContents(newFile, contents);
+        Utils.writeContents(file, contents);
     }
+
+
 }
