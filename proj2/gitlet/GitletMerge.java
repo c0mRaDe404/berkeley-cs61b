@@ -10,7 +10,6 @@ import static gitlet.GitletIndex.*;
 import static gitlet.GitletObject.getObjectPath;
 import static gitlet.GitletRepository.CWD;
 import static gitlet.GitletRepository.deleteFile;
-import static gitlet.GitletStatus.getRepoStatus;
 import static gitlet.Utils.*;
 
 public class GitletMerge {
@@ -279,15 +278,13 @@ public class GitletMerge {
         String tbId = getBranchId(tBranch); /* given branch id */
 
         boolean conflict = false;
-        /* merge base id */
+
         String mergeBaseId = findMergeBase(cbId, tbId, commitGraph);
 
-        /* commit objects */
         GitletCommitObj mergeBaseCommitObj = getCommit(mergeBaseId);
         GitletCommitObj currentCommitObj = getCommit(cbId);
         GitletCommitObj targetCommitObj = getCommit(tbId);
 
-        /* index snapshot from commits */
         GitletIndex sFiles = mergeBaseCommitObj.getSnapshot();
         GitletIndex cFiles = currentCommitObj.getSnapshot();
         GitletIndex tFiles = targetCommitObj.getSnapshot();
@@ -299,20 +296,15 @@ public class GitletMerge {
         } else if (mergeBaseId.equals(cbId)) {
             checkoutCommit(getCommit(tbId));
             updateBranch(cBranch, tbId);
-            clearIndex(); /* do i need to clear index? */
+            clearIndex();
             System.out.println("Current branch fast-forwarded.");
             System.exit(0);
         } else {
-
-            /* comparing files from the split point */
             for (String file : sFiles.getIndexPair().keySet()) {
-                /* file id from the split point */
-                String sFile = sFiles.getIndexEntry(file);
-                /* file id from the current branch */
-                String cFile = cFiles.getIndexEntry(file);
-                /* file id from the target branch */
-                String tFile = tFiles.getIndexEntry(file);
 
+                String sFile = sFiles.getIndexEntry(file);
+                String cFile = cFiles.getIndexEntry(file);
+                String tFile = tFiles.getIndexEntry(file);
 
                 if (sFile.equals(cFile)) {
                     /* not modified in the current branch */
@@ -329,15 +321,11 @@ public class GitletMerge {
                     }
                 } else {
                     /* modified in the current branch */
-                    /* different contents or removed */
-
-                    /* can be null */
                     File curObjPath = getObjectPath(
                             "blob",
                             cFiles
                                     .getIndexEntry(file));
 
-                    /* can be null */
                     File targetObjPath = getObjectPath(
                             "blob",
                             tFiles
@@ -345,33 +333,21 @@ public class GitletMerge {
 
                     if (!sFile.equals(tFile)) {
                         /* modified in the target branch as well */
-                        /* different contents or null/removed */
                         if (cFile == null) {
                             if (tFile != null) {
-                              /* file removed from the current branch
-                              but exists in the target branch
-                               */
                                 /* conflict */
                                 conflict = true;
                                 mergeFiles(join(CWD, file), curObjPath, targetObjPath);
                             }
                         } else {
                             if (tFile == null) {
-                             /* file exists in the current branch
-                             but removed from the target branch
-                              */
                                 /* conflict */
                                 conflict = true;
-
                                 mergeFiles(join(CWD, file), curObjPath, targetObjPath);
 
                             } else {
-                                /* both have been modified since the split point */
                                 /* conflict */
-                                /* read contents from both versions */
-                                /* insert markers */
                                 conflict = true;
-
                                 mergeFiles(join(CWD, file), curObjPath, targetObjPath);
                             }
                         }
@@ -390,7 +366,6 @@ public class GitletMerge {
                     .filter(key -> !mergeBaseCommitObj.getSnapshot().hasEntry(key))
                     .collect(Collectors.toSet());
 
-
             for (String file : newFilesTargetBranch) {
 
                 File curObjPath = getObjectPath(
@@ -403,7 +378,6 @@ public class GitletMerge {
                         tFiles
                                 .getIndexEntry(file));
 
-
                 if (cFiles.hasEntry(file)) {
                     if (!cFiles.getIndexEntry(file).equals(tFiles.getIndexEntry(file))) {
                         conflict = true;
@@ -414,7 +388,6 @@ public class GitletMerge {
                     stageFile(currentCommitObj, file);
                 }
             }
-
         }
 
         if (!conflict) {
@@ -441,7 +414,6 @@ public class GitletMerge {
             String cbId,
             String tbId,
             GitletIndex currentIndex) {
-
 
 
         GitletCommitObj commitObj = GitletCommitObj.createCommitObject("Merged "
@@ -478,9 +450,9 @@ public class GitletMerge {
         StringBuilder merged = new StringBuilder();
         merged.append("<<<<<<< HEAD\n");
         merged.append(currentContents);
-        merged.append("\n=======\n");
+        merged.append("=======\n");
         merged.append(targetContents);
-        merged.append("\n>>>>>>>");
+        merged.append(">>>>>>>\n");
         writeContents(file, merged.toString());
     }
 

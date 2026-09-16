@@ -76,15 +76,13 @@ public class GitletCommit {
         }
 
         GitletCommitObj commitObj = GitletCommitObj.createCommitObject(commitMsg,
-               getFormattedTime(new Date()),
-               currentIndex);
+                getFormattedTime(new Date()),
+                currentIndex);
 
         commitObj.addParent(getBranchId(getCurrentBranch()));
         updateBranch(getCurrentBranch(), createCommit(commitObj));
         clearIndex();
     }
-
-
 
 
     /**
@@ -145,8 +143,8 @@ public class GitletCommit {
         List<String> parents = commitObj.getParents();
         StringBuilder parentString = new StringBuilder();
         if (parents.size() >= 2) {
-            for (String parent: parents) {
-               parentString.append(parent, 0, 7).append(" ");
+            for (String parent : parents) {
+                parentString.append(parent, 0, 7).append(" ");
             }
             System.out.println("Merge: " + parentString);
         }

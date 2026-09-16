@@ -9,7 +9,6 @@ import static gitlet.GitletIndex.*;
 import static gitlet.GitletMerge.*;
 import static gitlet.GitletObject.getObjPathComplete;
 import static gitlet.GitletStatus.getRepoStatus;
-import static gitlet.GitletStatus.getSnapshotStatus;
 
 /**
  * Driver class for Gitlet, a subset of the Git version-control system.

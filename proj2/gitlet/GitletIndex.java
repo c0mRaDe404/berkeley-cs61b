@@ -239,12 +239,12 @@ public class GitletIndex implements Serializable {
 
     public boolean hasModifiedFiles(GitletCommitObj commitObj) {
 
-       for (String file: getCommitSnapshot(getIndexInstance()).getIndexPair().keySet()) {
-           if (isModified(commitObj, file)) {
-              return true;
-           }
-       }
-       return false;
+        for (String file : getCommitSnapshot(getIndexInstance()).getIndexPair().keySet()) {
+            if (isModified(commitObj, file)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public HashMap<String, String> getIndexPair() {
