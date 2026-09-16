@@ -333,17 +333,20 @@ public class GitletMerge {
                             /* conflict */
                             conflict = true;
                             mergeFiles(join(CWD, file), curObjPath, targetObjPath);
+                            stageFile(currentCommitObj, file);
+
                         }
                     } else {
                         if (tFile == null) {
                             /* conflict */
                             conflict = true;
                             mergeFiles(join(CWD, file), curObjPath, targetObjPath);
-
+                            stageFile(currentCommitObj, file);
                         } else {
                             /* conflict */
                             conflict = true;
                             mergeFiles(join(CWD, file), curObjPath, targetObjPath);
+                            stageFile(currentCommitObj, file);
                         }
                     }
                 }
@@ -393,6 +396,7 @@ public class GitletMerge {
                 if (!cFiles.getIndexEntry(file).equals(tFiles.getIndexEntry(file))) {
                     conflict = true;
                     mergeFiles(join(CWD, file), curObjPath, targetObjPath);
+                    stageFile(currentCommitObj, file);
                 }
             } else {
                 checkoutFile(targetCommitObj, file);
@@ -425,8 +429,6 @@ public class GitletMerge {
         GitletCommitObj currentCommitObj = getCommit(cbId);
         GitletCommitObj targetCommitObj = getCommit(tbId);
 
-
-
         if (mergeBaseId.equals(tbId)) {
             System.out.println("Given branch is an ancestor of the current branch.");
             System.exit(0);
@@ -442,19 +444,11 @@ public class GitletMerge {
                     mergeBaseCommitObj,
                     currentCommitObj,
                     targetCommitObj);
+
+            makeMergeCommit(cBranch, tBranch, cbId, tbId);
         }
 
-        if (!conflict) {
-
-            GitletIndex currentIndex = getIndexInstance();
-
-            if (!currentIndex.hasStagedFiles()) {
-                System.err.println("No changes added to the commit.");
-                System.exit(0);
-            }
-
-            makeMergeCommit(cBranch, tBranch, cbId, tbId, currentIndex);
-        } else {
+        if (conflict) {
             System.err.println("Encountered a merge conflict.");
             System.exit(0);
         }
@@ -466,9 +460,14 @@ public class GitletMerge {
             String cBranch,
             String tBranch,
             String cbId,
-            String tbId,
-            GitletIndex currentIndex) {
+            String tbId) {
 
+        GitletIndex currentIndex = getIndexInstance();
+
+        if (!currentIndex.hasStagedFiles()) {
+            System.err.println("No changes added to the commit.");
+            System.exit(0);
+        }
 
         GitletCommitObj commitObj = GitletCommitObj.createCommitObject("Merged "
                         + tBranch
