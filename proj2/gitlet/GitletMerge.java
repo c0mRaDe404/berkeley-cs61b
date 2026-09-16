@@ -255,6 +255,8 @@ public class GitletMerge {
                         return commit;
                     }
                 }
+                i += 1;
+                j += 1;
             } else if (currentDepth.getKey() > targetDepth.getKey()) {
                 j += 1;
             } else {
