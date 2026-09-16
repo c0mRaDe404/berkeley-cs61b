@@ -30,7 +30,7 @@ public class GitletStatus {
         return status;
     }
 
-    private static Map<String, List<String>> getSnapshotStatus(GitletIndex index,
+    public static Map<String, List<String>> getSnapshotStatus(GitletIndex index,
                                                                GitletCommitObj currentCommit) {
 
 

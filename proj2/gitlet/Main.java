@@ -9,6 +9,7 @@ import static gitlet.GitletIndex.*;
 import static gitlet.GitletMerge.*;
 import static gitlet.GitletObject.getObjPathComplete;
 import static gitlet.GitletStatus.getRepoStatus;
+import static gitlet.GitletStatus.getSnapshotStatus;
 
 /**
  * Driver class for Gitlet, a subset of the Git version-control system.
@@ -75,7 +76,8 @@ public class Main {
                 GitletMerge.CommitGraph y = depthFind(getBranchId(getCurrentBranch()), getBranchId(args[1]));
                 GitletIndex currentIndex = getIndexInstance();
 
-                if (currentIndex.hasStagedFiles()) {
+                if (currentIndex.hasStagedFiles()
+                        || currentIndex.hasModifiedFiles(getCurrentCommit())) {
                     System.err.println("You have uncommitted changes.");
                     System.exit(0);
                 }
