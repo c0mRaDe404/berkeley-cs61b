@@ -237,13 +237,17 @@ public class GitletMerge {
         var current = generations(currentCommitId, commitGraph);
         var target = generations(targetCommitId, commitGraph);
 
-        var iterCurrent = current.entrySet().iterator();
-        var iterTarget = target.entrySet().iterator();
 
+        List<Map.Entry<Integer, Set<String>>> currentList =
+                new ArrayList<>(current.entrySet());
+        List<Map.Entry<Integer, Set<String>>> targetList =
+                new ArrayList<>(target.entrySet());
 
-        while (iterTarget.hasNext() && iterCurrent.hasNext()) {
-            var currentDepth = iterCurrent.next();
-            var targetDepth = iterTarget.next();
+        int i = 0;
+        int j = 0;
+        while (i < currentList.size() && j < targetList.size()) {
+            var currentDepth = currentList.get(i);
+            var targetDepth = targetList.get(j);
 
             if (currentDepth.getKey().equals(targetDepth.getKey())) {
                 for (String commit : currentDepth.getValue()) {
@@ -252,9 +256,10 @@ public class GitletMerge {
                     }
                 }
             } else if (currentDepth.getKey() > targetDepth.getKey()) {
-                targetDepth = iterTarget.next();
+                j += 1;
             } else {
-                currentDepth = iterCurrent.next();
+                i += 1;
+
             }
         }
 
