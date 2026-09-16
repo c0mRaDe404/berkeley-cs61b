@@ -136,6 +136,11 @@ public class GitletBranch {
         return join(GITLET_DIR, "refs", "heads", branchName);
     }
 
+
+    public static boolean branchExists(String branchName) {
+        return getBranchFile(branchName).exists();
+    }
+
     /**
      * gives the branchId for the given branch
      *

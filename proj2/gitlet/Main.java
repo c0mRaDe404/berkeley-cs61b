@@ -69,18 +69,26 @@ public class Main {
                 checkRepoDoesNotExist();
                 removeBranch(args[1]);
                 break;
-            case "merge-base":
-                checkRepoDoesNotExist();
-                GitletMerge.CommitGraph x = depthFind(getBranchId(getCurrentBranch()), getBranchId(args[1]));
-                x.printParentsFormatted();
-                System.out.println();
-                x.printDepthFormatted();
-                mergeBranches(getCurrentBranch(), args[1], x);
-                break;
             case "merge":
                 checkRepoDoesNotExist();
+                checkUntracked();
                 GitletMerge.CommitGraph y = depthFind(getBranchId(getCurrentBranch()), getBranchId(args[1]));
+                GitletIndex currentIndex = getIndexInstance();
 
+                if (currentIndex.hasStagedFiles()) {
+                    System.err.println("You have uncommitted changes.");
+                    System.exit(0);
+                }
+
+                if (!branchExists(args[1])) {
+                    System.err.println("A branch with that name does not exist.");
+                    System.exit(0);
+                }
+
+                if (args[1].equals(getCurrentBranch())) {
+                    System.err.println("Cannot merge a branch with itself.");
+                    System.exit(0);
+                }
                 mergeBranches(getCurrentBranch(), args[1], y);
                 break;
             case "checkout":

@@ -15,21 +15,41 @@ public class GitletObject {
     private static final String HASH_ALGO = "SHA-256";
     private static final int DIGEST_LENGTH = getDigestLength();
 
+    /** returns the hash digest of a given file
+     *
+     * @param file
+     * @return a hash digest if the given file exists, otherwise null
+     */
     public static String hashFileObject(String file) {
         File fileObj;
         fileObj = join(CWD, file);
-        //checkFileExists(file);
+        if (!fileObj.exists()) {
+            return null;
+        }
         return hashObject(readContentsAsString(fileObj));
     }
 
+    /** returns the hashing algorithm used in gitlet
+     *
+     * @return the hash algorithm string
+     */
     public static String getHashAlgo() {
         return HASH_ALGO;
     }
 
+    /** returns the hash digest of objects
+     *
+     * @param contents
+     * @return a hash digest
+     */
     public static String hashObject(Object... contents) {
         return Utils.sha(contents);
     }
 
+    /** gives digest length
+     *
+     * @return the hash value string's length
+     */
     public static int getDigestLength() {
         try {
             return MessageDigest.getInstance(HASH_ALGO).getDigestLength();
@@ -37,10 +57,22 @@ public class GitletObject {
             throw new RuntimeException(e);
         }
     }
+
+    /** gets the directory where objects are stored
+     *
+     * @param type
+     * @return the object directory inside the gitlet repo
+     */
     public static File getObjDir(String type) {
         return join(OBJ_DIR, type);
     }
 
+    /** given a partial commit id, it constructs the full commit id
+     *
+     * @param type
+     * @param commitId
+     * @return the path of an object, returns null if it does not exist
+     */
     public static String getObjPathComplete(String type, String commitId) {
 
         if (commitId.length() == DIGEST_LENGTH) {
@@ -68,14 +100,30 @@ public class GitletObject {
 
     }
 
+    /** requires full commit id, nothing else about it
+     *
+     * @param type
+     * @param commitId
+     * @return the object path, null if it does not exist
+     */
     public static File getObjectPath(String type, String commitId) {
         String objParent, objFile;
+        if (commitId == null) {
+            return null;
+        }
+
         objParent = commitId.substring(0, 2);
         objFile = commitId.substring(2);
         return join(OBJ_DIR, type, objParent, objFile);
     }
 
 
+    /** creates object files
+     *
+     * @param type
+     * @param commitId
+     * @return the created file
+     */
     public static File createObjectFile(String type, String commitId) {
         File targetDir, targetFile;
 

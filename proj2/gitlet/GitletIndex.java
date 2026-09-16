@@ -204,6 +204,9 @@ public class GitletIndex implements Serializable {
         writeToIndex();
     }
 
+    public void removeFromIndexNoWrite(String file) {
+        INDEX.remove(file);
+    }
 
     /**
      * sort the index key-value pairs and concatenates them to one long string
